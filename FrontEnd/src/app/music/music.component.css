@@ -1,0 +1,57 @@
+.music-boxe {    
+    background-color: var(--light-blue);
+    border-radius: 10px;   
+    margin: 5px 10px;   
+    width: 80vw;
+    justify-content: space-around;
+  }
+.music-boxe text{
+    color: var(--graphite);
+}
+.music-boxe p{
+    color: var(--graphite);
+}
+
+.positions-container {
+    justify-content: center;
+    width: 4vw;
+}
+
+.green-icon-button {
+    --color-green: var(--green);
+}
+
+.green-icon-button:hover {
+    --color-green: var(--green-transparent);
+}
+
+.img-tit-art-container {
+    align-self: center;
+    justify-content: space-around;
+    width: 40vw;
+    font-size: 25px;
+}
+
+.reading-container {
+    width: 25vw;
+}
+
+.info-icon-container {
+    align-self: center;
+    justify-self: center;
+    margin-top: 5px;
+    width: 7vw;
+}
+
+.dark-blue-icon {
+    --color-d-blue: var(--dark-blue);
+}
+
+.dark-blue-icon:hover {    
+    --color-d-blue: var(--dark-blue-transparent);    
+}
+
+.delete-container {
+    width:7vw;
+}
+

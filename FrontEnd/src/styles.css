@@ -1,1 +1,183 @@
 /* You can add global styles to this file, and also import other style files */
+:root {
+    --white: #ffffff;
+    --gray: #b0b0b0;
+    --graphite: #57524f;
+    --dark-blue: #322f3a;
+    --medium-blue: #4e495c;
+    --light-blue: #e8e0ff;
+    --red: #cf0003;
+    --green: #018127;
+
+    --white-transparent: rgba(255,255,255,0.5);    
+    --dark-blue-transparent: rgba(50, 47, 58, 0.5);
+    --red-transparent: rgba(207, 0, 3, 0.5);
+    --green-transparent: rgba(01, 129, 39, 0.5);
+
+    font-family: 'GFS Didot', sans-serif;
+    
+    font-size: 25px;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: color 0.5s, background-color 0.5s;
+}
+
+.white{
+  color: var(--white);
+}
+.dark-blue{
+  color: var(--dark-blue);
+}
+.red{
+  color: var(--red);
+}
+.green{
+  color: var(--green);
+}
+
+body {
+    color: var(--white);
+    background: var(--dark-blue);
+    background-size: cover;
+    line-height: 1.6;
+    min-width: 290px;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    box-sizing: inherit;
+    position: relative;
+
+    overflow: hidden;
+    height: 100vh;
+}
+
+/* Buttons */
+
+button {
+    font-weight: 400;
+    font-style: normal;
+    -webkit-font-smoothing: antialiased;
+    font-size: 16px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    margin: 5px 0px;
+    cursor: pointer;
+}
+
+.light-to-dark-button {
+    align-content: center;
+    padding: 2vmin;
+    border-radius: 10px;
+    border: 2px solid var(--dark-blue);
+    background-color: var(--light-blue);
+}
+
+.light-to-dark-button:hover {
+    background-color: var(--dark-blue);
+}
+
+.light-to-dark-button .text {
+    color: var(--graphite);
+}
+
+.light-to-dark-button:hover .text {
+    color: var(--white);
+}
+
+.icon-button{
+  align-self: center;
+  justify-self: center;
+  background-color: transparent;
+  border: none;
+}
+
+
+.row-display {
+  display: flex;
+  flex-direction: row;
+}
+
+.column-display {
+  display: flex;
+  flex-direction: column;
+}
+
+
+.green-icon {
+  --color-green: var(--green);
+}
+
+.green-icon:hover {
+  --color-green: var(--green-transparent);
+}
+
+.white-icon {
+  --color-white: var(--white);
+}
+
+.white-icon:hover {    
+  --color-white: var(--gray);    
+}
+
+.red-icon {
+  --color-red: var(--red);
+}
+
+.red-icon:hover {
+  --color-red: var(--red-transparent);
+}
+
+.dark-blue-icon {
+  --color-d-blue: var(--dark-blue);
+}
+
+.dark-blue-icon:hover {    
+  --color-d-blue: var(--dark-blue-transparent);    
+}
+
+  h1 {
+    font-size: 3.125rem;
+    color: var(--gray-900);
+    font-weight: 500;
+    line-height: 100%;
+    letter-spacing: -0.125rem;
+    margin: 0;
+  }
+
+  p {
+    margin: 0;
+    color: var(--gray-700);
+  }
+
+  
+
+
+  .content {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+  }
+
+  .content h1 {
+    margin-top: 1.75rem;
+  }
+
+  .container-base {
+    width: 90%;
+    margin: 10px 5% 10px 5%;    
+  }
+
+  .container-boxe {    
+    background-color: var(--medium-blue);
+    border-radius: 10px;      
+    padding: 5px;
+  }
+
+  .container-boxe p {
+    margin: 0 10px;
+  }
+  

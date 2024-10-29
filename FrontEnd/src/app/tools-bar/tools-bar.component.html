@@ -1,0 +1,36 @@
+<div class="container-base container-boxe">
+    
+    <div class="row-display tools-bar-boxe">
+        <div class="row-display">
+            <input class="search-bar" [(ngModel)]="searchText" placeholder="Search" type="text"/>
+            <button class="white-icon icon-button" (click)="resetSearch()">
+                <ng-icon name="heroXMarkSolid" color="var(--color-white)" size="40"/>
+            </button>
+            <button class="icon-button" (click)="titleOrdering()">
+                <ng-icon *ngIf="order==-1 && attributeOrder==attribute.Title" name="heroArrowDownSolid" color="var(--white)" size="40"/>            
+                <ng-icon *ngIf="(attributeOrder==attribute.Title && order==0) || attributeOrder!=attribute.Title" name="heroMinusSolid" color="var(--gray)" size="40"/>
+                <ng-icon *ngIf="order==1 && attributeOrder==attribute.Title" name="heroArrowUpSolid" color="var(--white)" size="40"/>
+                <div [ngClass]="{'orderingTextNotSelected': (attributeOrder==attribute.Title && order==0) || attributeOrder!=attribute.Title, 'orderingTextSelected': attributeOrder==attribute.Title && order!=0}">Title</div>
+            </button>
+
+            <button class="icon-button" (click)="artistOrdering()">
+                <ng-icon *ngIf="order==-1 && attributeOrder==attribute.Artist" name="heroArrowDownSolid" color="var(--white)" size="40"/>            
+                <ng-icon *ngIf="(attributeOrder==attribute.Artist && order==0) || attributeOrder!=attribute.Artist" name="heroMinusSolid" color="var(--gray)" size="40"/>
+                <ng-icon *ngIf="order==1 && attributeOrder==attribute.Artist" name="heroArrowUpSolid" color="var(--white)" size="40"/>
+                <div [ngClass]="{'orderingTextNotSelected': (attributeOrder==attribute.Artist && order==0) || attributeOrder!=attribute.Artist, 'orderingTextSelected': attributeOrder==attribute.Artist && order!=0}">Artist</div>
+            </button>
+        </div>
+        <div class="row-display">
+            <button class="white-icon icon-button">
+                <ng-icon name="heroDocumentPlusSolid" color="var(--color-white)" size="40"/>
+            </button>
+            <button class="white-icon icon-button">
+                <ng-icon name="heroArrowUturnLeftSolid" color="var(--color-white)" size="40"/>
+            </button>
+            <button class="white-icon icon-button">
+                <ng-icon name="heroArrowUturnRightSolid" color="var(--color-white)" size="40"/>
+            </button>
+        </div>
+    </div>
+
+</div>

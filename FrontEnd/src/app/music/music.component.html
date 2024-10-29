@@ -1,0 +1,29 @@
+
+<div class="music-boxe row-display ">
+    <div class="column-display positions-container">
+        <button *ngIf="index!=0" class="green-icon icon-button" (click)="moveUpMusic()">
+            <ng-icon name="heroChevronUpSolid" color="var(--color-green)" size="40"/>
+        </button>
+        <button *ngIf="index!=maxIndex-1" class="green-icon icon-button" (click)="moveDownMusic()">
+            <ng-icon name="heroChevronDownSolid" color="var(--color-green)" size="40"/>
+        </button>
+    </div>
+    <div class=" img-tit-art-container">
+        <div *ngIf="image">
+            <p>image music</p>
+        </div>
+        <div class="column-display">
+            <p>Title: {{title}}</p>
+            <p>Artist: {{artist}}</p>
+        </div>
+    </div>
+    <div class="reading-container">
+        <p>reading music</p>
+    </div>
+    <div class="info-icon-container dark-blue-icon">
+        <ng-icon name="heroInformationCircle" color="var(--color-d-blue)" size=70/>
+    </div>
+    <button class="delete-container red-icon icon-button" (click)="deleteMusic()">
+        <ng-icon name="heroTrashSolid" color="var(--color-red)" size=70/>
+    </button>
+</div>
