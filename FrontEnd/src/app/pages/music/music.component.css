@@ -43,15 +43,6 @@
     width: 7vw;
 }
 
-.dark-blue-icon {
-    --color-d-blue: var(--dark-blue);
-}
-
-.dark-blue-icon:hover {    
-    --color-d-blue: var(--dark-blue-transparent);    
-}
-
 .delete-container {
     width:7vw;
 }
-

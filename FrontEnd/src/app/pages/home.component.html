@@ -1,0 +1,19 @@
+<div class="content column-display">
+      
+    <app-tools-bar [order]="order" [attributeOrder]="attributeOrder" [cantUndo]="undoActions.isEmpty()" [cantRedo]="redoActions.isEmpty()"
+    (searchTriggered)="searchMusicList($event)" (orderTriggered)="ordering($event)" (volumeTriggered)="modifVolume($event)" 
+    (addTriggered)="addMusics($event)" (undoTriggered)="undoAction()" (redoTriggered)="redoAction()"/>
+
+
+    <div class="container-base container-boxe ">
+      <div class="music-list-boxe">
+          <tr *ngFor="let music of musicList, let i = index">
+              <app-music [index]="i" [maxIndex]="musicList.length" [music]=music [volume]="volume"
+              (deleteTriggered)="removeIndex($event)" (upperTriggered)="upperMoveIndex($event)" (downTriggered)="downMoveIndex($event)"/>
+          </tr>
+      </div>
+    </div>
+    <app-save-bar/>
+    
+    <p>Affiché : {{musicList.length}}, Retiré : {{musicListRetired.length}}, order : {{order}}, attribute {{attributeOrder}}, volume : {{volume}}, size undo : {{undoActions.length()}}, size redo : {{redoActions.length()}}</p>
+</div>

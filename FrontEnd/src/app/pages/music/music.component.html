@@ -9,20 +9,18 @@
         </button>
     </div>
     <div class=" img-tit-art-container">
-        <div *ngIf="image">
-            <p>image music</p>
+        <div *ngIf="music.image">
+            <p>music.image</p>
         </div>
         <div class="column-display">
-            <p>Title: {{title}}</p>
-            <p>Artist: {{artist}}</p>
+            <p>Title: {{music.title}}</p>
+            <p>Artist: {{music.artist}}</p>
         </div>
     </div>
     <div class="reading-container">
-        <p>reading music</p>
+        <app-music-reader [path]="music.access_path" [volume]="volume"/>
     </div>
-    <div class="info-icon-container dark-blue-icon">
-        <ng-icon name="heroInformationCircle" color="var(--color-d-blue)" size=70/>
-    </div>
+
     <button class="delete-container red-icon icon-button" (click)="deleteMusic()">
         <ng-icon name="heroTrashSolid" color="var(--color-red)" size=70/>
     </button>

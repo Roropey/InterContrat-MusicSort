@@ -70,29 +70,38 @@ button {
 
 .light-to-dark-button {
     align-content: center;
-    padding: 2vmin;
+    padding: 1vmin;
     border-radius: 10px;
-    border: 2px solid var(--dark-blue);
+    border: 3px solid var(--dark-blue);
     background-color: var(--light-blue);
+    --icon-color: var(--dark-blue);
 }
 
 .light-to-dark-button:hover {
     background-color: var(--dark-blue);
+    --icon-color: var(--white);
 }
 
-.light-to-dark-button .text {
+.light-to-dark-button p {
     color: var(--graphite);
+    font-size: 25px;
 }
 
-.light-to-dark-button:hover .text {
+.light-to-dark-button:hover p {
     color: var(--white);
 }
 
-.icon-button{
+.icon-button {
+  
   align-self: center;
   justify-self: center;
   background-color: transparent;
   border: none;
+  cursor: not-allowed;
+}
+
+.icon-button:enabled {
+  cursor: pointer;
 }
 
 
@@ -115,11 +124,14 @@ button {
   --color-green: var(--green-transparent);
 }
 
-.white-icon {
+.white-icon:enabled {
   --color-white: var(--white);
 }
 
-.white-icon:hover {    
+.white-icon:not(:enabled){    
+  --color-white: var(--gray);    
+}
+.white-icon:hover:enabled{    
   --color-white: var(--gray);    
 }
 
@@ -150,7 +162,6 @@ button {
 
   p {
     margin: 0;
-    color: var(--gray-700);
   }
 
   
@@ -180,4 +191,52 @@ button {
   .container-boxe p {
     margin: 0 10px;
   }
+
+  .window-item {
+    width: fit-content;
+    height: fit-content;
+    background-color: var(--light-blue);
+    border-radius: 20px;
+    outline: var(--dark-blue) solid 3px;
+    justify-content: space-around;
+    top: 20vh;
+    border: 3px;
+    padding: 2vw;
+    cursor: default;
+
+  }
+
+  .popup-container {
+    display: flex;
+    cursor: pointer;
+    justify-content: center;    
+  }
+  .popup-window-item {
+    z-index: 400;
+    text-align: center;
+    position: fixed;
+    
+    align-items: center;
+  }
   
+  .popup-background-item {
+    z-index: 5;
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    background-color: var(--dark-blue-transparent);
+    top: 0;
+    left: 0;
+    cursor: pointer;
+  }
+  .path-bar{
+    height: 5vh;    
+    width: 20vw;
+    border-radius: 10px;
+    outline: none;
+    display: flex;
+    flex-direction: row;
+    font-size: 25px;
+    margin: 10px;
+    padding: 0 5px;
+}

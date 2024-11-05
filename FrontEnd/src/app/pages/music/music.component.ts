@@ -1,4 +1,5 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { MusicAttribute } from '../../interfaces/music-attribute';
 
 @Component({
   selector: 'app-music',
@@ -11,11 +12,19 @@ export class MusicComponent {
   @Input()
   maxIndex: number = -1;
   @Input()
-  title: string = "";
+  music: MusicAttribute = {
+    origin_path:"",
+    access_path:"",
+    title: "",
+    artist: "",
+    album: "",
+    image: "",
+    year: 0,
+    number: 0,
+    genre: ""
+  };
   @Input()
-  artist: string = "";
-  @Input()
-  image: any;
+  volume: number = 1;
 
   @Output()
   deleteTriggered: EventEmitter<number> = new EventEmitter<number>();

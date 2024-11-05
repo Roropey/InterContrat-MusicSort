@@ -10,25 +10,7 @@
 
 
 <main class="main non-scrollable">
-  <div class="content column-display">
-      
-      <app-tools-bar [order]="order" [attributeOrder]="attributeOrder"
-      (searchTriggered)="searchMusicList($event)" (orderTriggered)="ordering($event)"/>
-
-
-      <p>Affiché : {{musicList.length}}, Retiré : {{musicListRetired.length}}, calc : {{test}}, order : {{order}}, attribute {{attributeOrder}}</p>
-
-      <div class="container-base container-boxe ">
-        <div class="music-list-boxe">
-            <tr *ngFor="let music of musicList, let i = index">
-                <app-music [index]="i" [maxIndex]="musicList.length" [title]=music.title [artist]=music.artist [image]="music.image" 
-                (deleteTriggered)="deleteIndex($event)" (upperTriggered)="upperMoveIndex($event)" (downTriggered)="downMoveIndex($event)"/>
-            </tr>
-        </div>
-      </div>
-      <app-save-bar/>
-      
-  </div>
+  <app-home/>
 </main>
 
 <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->

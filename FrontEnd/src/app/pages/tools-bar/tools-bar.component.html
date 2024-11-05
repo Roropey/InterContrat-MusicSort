@@ -1,4 +1,4 @@
-<div class="container-base container-boxe">
+<div class="container-base container-boxe non-scrollable">
     
     <div class="row-display tools-bar-boxe">
         <div class="row-display">
@@ -20,17 +20,37 @@
                 <div [ngClass]="{'orderingTextNotSelected': (attributeOrder==attribute.Artist && order==0) || attributeOrder!=attribute.Artist, 'orderingTextSelected': attributeOrder==attribute.Artist && order!=0}">Artist</div>
             </button>
         </div>
-        <div class="row-display">
-            <button class="white-icon icon-button">
-                <ng-icon name="heroDocumentPlusSolid" color="var(--color-white)" size="40"/>
+        <div class="row-display left-tool-container non-scrollable">
+            <div class = "volume-container row-display">
+                <div class="volume-icon">
+                <ng-icon *ngIf="volume>0" name="heroSpeakerWaveSolid" color="var(--white)" size="40"/>
+                <ng-icon *ngIf="volume==0" name="heroSpeakerXMarkSolid" color="var(--white)" size="40"/>
+            </div>
+                <input class="volume-range" type="range" min="0" max="1" step="0.05" [(ngModel)]="volume">  
+            </div>                         
+            <button class="white-icon icon-button" (click)="openClosePopupAdd()">
+                <ng-icon name="heroDocumentPlus" color="var(--color-white)" size="40"/>
             </button>
-            <button class="white-icon icon-button">
+            <button class="white-icon icon-button" [disabled]="cantUndo" (click)="sendUndo()">
                 <ng-icon name="heroArrowUturnLeftSolid" color="var(--color-white)" size="40"/>
             </button>
-            <button class="white-icon icon-button">
+            <button class="white-icon icon-button" [disabled]="cantRedo" (click)="sendRedo()">
                 <ng-icon name="heroArrowUturnRightSolid" color="var(--color-white)" size="40"/>
             </button>
         </div>
     </div>
 
+</div>
+
+<div *ngIf="openPopupAdd" class="popup-container">
+    <div class="popup-window-item window-item column-display">
+        <input class="path-bar" [(ngModel)]="pathAdd" placeholder="Path" type="text"/>
+        <button class="light-to-dark-button load-button row-display" (click)="loadMusics()">
+            <ng-icon name="heroDocumentPlus" color="var(--icon-color)" size="30"/>
+            <p>Load</p>
+        </button>
+    </div>
+    <div class="popup-background-item" (click)="openClosePopupAdd()">
+        
+    </div>
 </div>
