@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { MusicAttribute } from '../../interfaces/music-attribute';
 
+
 @Component({
   selector: 'app-music',
   templateUrl: './music.component.html',
@@ -26,6 +27,10 @@ export class MusicComponent {
   @Input()
   volume: number = 1;
 
+  
+
+  popoverOpened: boolean = false;
+  countOutside: number = 0;
   @Output()
   deleteTriggered: EventEmitter<number> = new EventEmitter<number>();
   @Output()
@@ -33,6 +38,9 @@ export class MusicComponent {
   @Output()
   downTriggered: EventEmitter<number> = new EventEmitter<number>();
 
+  countPlusOutside(param:any){
+    this.countOutside++
+  }
   deleteMusic(){
     this.deleteTriggered.emit(this.index);
   }
@@ -43,6 +51,18 @@ export class MusicComponent {
 
   moveDownMusic(){
     this.downTriggered.emit(this.index);
+  }
+
+  setPopoverValue(value: boolean) {
+    this.popoverOpened = value
+  }
+
+  changePopoverValue(){
+    this.popoverOpened = !this.popoverOpened
+  }
+
+  closePopover() {
+    this.popoverOpened = false
   }
 
 }

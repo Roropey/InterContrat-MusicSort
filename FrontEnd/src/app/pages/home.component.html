@@ -13,7 +13,7 @@
           </tr>
       </div>
     </div>
-    <app-save-bar/>
+    <app-save-bar (saveWorkTriggered)="saveWork()" (saveFilesTriggered)="saveFiles($event)" (downloadTriggered)="downloadFiles($event)"/>
     
     <p>Affiché : {{musicList.length}}, Retiré : {{musicListRetired.length}}, order : {{order}}, attribute {{attributeOrder}}, volume : {{volume}}, size undo : {{undoActions.length()}}, size redo : {{redoActions.length()}}</p>
 </div>

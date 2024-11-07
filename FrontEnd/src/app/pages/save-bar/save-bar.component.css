@@ -2,3 +2,9 @@
     display: flex;
     justify-content: end;
 }
+
+.save-bar-container{
+    width:40%;
+    padding: 0px 10px;
+    justify-content: space-between;
+}

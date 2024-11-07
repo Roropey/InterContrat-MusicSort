@@ -203,7 +203,8 @@ export class HomeComponent implements OnInit{
   }
 
   addMusics(path:string){
-    alert("Add from "+path)
+    const new_path: string = path.replaceAll("\\","/")
+    alert("Add from "+new_path)
   }
 
   undoAction(){
@@ -255,6 +256,19 @@ export class HomeComponent implements OnInit{
           break
       }
     }
+  }
+
+  saveWork(){
+    alert("Receive poke to save locally the work")
+  }
+
+  saveFiles(path: string){
+    const new_path: string = path.replaceAll("\\","/")
+    alert("Receive "+new_path+" to save/copy the files there")
+  }
+
+  downloadFiles(name: string){
+    alert("Receive the name "+name+" for the zip folder of all musics")
   }
 
 }

@@ -1,6 +1,61 @@
 
 <div class="right-align container-base">
-    <div class="container-boxe">
-        <p>save-bar works!</p>
+    <div class="container-boxe save-bar-container row-display">
+        <button class="light-to-dark-button load-button row-display" (click)="saveLocaly()"
+        ngxTooltip [template]="tooltipSaveLoc" placement="top" arrow>
+            <p>Save work</p>
+        </button>
+        <button class="light-to-dark-button load-button row-display" (click)="openClosePopupSave()"
+        ngxTooltip [template]="tooltipSaveFiles" placement="top" arrow>
+            <ng-icon name="heroFolderArrowDown" color="var(--icon-color)" size="30"/>
+            <p>Save files</p>
+        </button>
+        <button class="light-to-dark-button load-button row-display" (click)="openClosePopupDownload()"
+        ngxTooltip [template]="tooltipDownload" placement="top" arrow>
+            <ng-icon name="heroArrowDownTraySolid" color="var(--icon-color)" size="30"/>
+            <p>Download</p>
+        </button>
+    </div>
+</div>
+
+<ng-template #tooltipSaveLoc>
+    <div class="tooltip-item">
+        <p>Save locally the working session</p>
+    </div>
+</ng-template>
+<ng-template #tooltipSaveFiles>
+    <div class="tooltip-item">
+        <p>Save into a folder all selected musics</p>
+    </div>
+</ng-template>
+<ng-template #tooltipDownload>
+    <div class="tooltip-item">
+        <p>Download the selected musics in zip folder</p>
+    </div>
+</ng-template>
+
+<div *ngIf="openPopupSave" class="popup-container">
+    <div class="popup-window-item window-item column-display">
+        <input class="path-bar" [(ngModel)]="pathSave" placeholder="Path" type="text"/>
+        <button class="light-to-dark-button load-button row-display" (click)="saveFiles()">
+            <ng-icon name="heroFolderArrowDown" color="var(--icon-color)" size="30"/>
+            <p>Save files</p>
+        </button>
+    </div>
+    <div class="popup-background-item" (click)="openClosePopupSave()">
+        
+    </div>
+</div>
+
+<div *ngIf="openPopupDownload" class="popup-container">
+    <div class="popup-window-item window-item column-display">
+        <input class="path-bar" [(ngModel)]="nameDownload" placeholder="Name" type="text"/>
+        <button class="light-to-dark-button load-button row-display" (click)="downloadFiles()">
+            <ng-icon name="heroArrowDownTraySolid" color="var(--icon-color)" size="30"/>
+            <p>Download</p>
+        </button>
+    </div>
+    <div class="popup-background-item" (click)="openClosePopupDownload()">
+        
     </div>
 </div>

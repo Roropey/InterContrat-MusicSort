@@ -20,8 +20,60 @@
     <div class="reading-container">
         <app-music-reader [path]="music.access_path" [volume]="volume"/>
     </div>
+    
+    <ngx-popover #popover position="left" [bindTo]="popoverButton" [value]="popoverOpened" disabled="true"
+    (clickOutside)="countPlusOutside($event)" (valueChange)="setPopoverValue($event)">    
+        <div #popoverButton>
+            <button class="info-icon-container dark-blue-icon red-icon icon-button" (click)="popoverOpened ? closePopover() : popover.open()"
+            ngxTooltip [template]="popoverOpened ? tooltipNot : tooltipInfos">
+                <ng-icon *ngIf="popoverOpened" name="heroXMarkSolid" color="var(--color-red)" size="70"/>  
+                <ng-icon *ngIf="!popoverOpened" name="heroInformationCircle" color="var(--color-d-blue)" size=70/>
+            </button> 
+        </div>  
+         
+        <ng-template ngx-popover-template>
+            <div class="window-item popover-container column-display">          
+                <div class="row-display space-between-container">
+                    <p>Title:</p>
+                    <input class="info-bar" [(ngModel)]="music.title" placeholder="Title" type="text"/>
+                </div>
+                <div class="row-display space-between-container">
+                    <p>Artist:</p>
+                    <input class="info-bar" [(ngModel)]="music.artist" placeholder="Artist" type="text"/>
+                </div>
+                <div class="row-display space-between-container">
+                    <p>Album:</p>
+                    <input class="info-bar" [(ngModel)]="music.album" placeholder="Album" type="text"/>
+                </div>
+                <div class="row-display space-between-container">
+                    <p>N°:</p>
+                    <input class="info-bar" [(ngModel)]="music.number" placeholder="Number" type="text"/>
+                </div>
+                <div class="row-display space-between-container">
+                    <p>Year:</p>
+                    <input class="info-bar" [(ngModel)]="music.year" placeholder="Year" type="text"/>
+                </div>
+                <div class="row-display space-between-container">
+                    <p>Genre:</p>
+                    <input class="info-bar" [(ngModel)]="music.genre" placeholder="Genre" type="text"/>
+                </div>
 
+            </div>
+        </ng-template>
+    </ngx-popover>
     <button class="delete-container red-icon icon-button" (click)="deleteMusic()">
         <ng-icon name="heroTrashSolid" color="var(--color-red)" size=70/>
     </button>
 </div>
+
+
+<ng-template #tooltipInfos>
+    <div class="tooltip-item">
+        <p>Music details</p>
+    </div>
+</ng-template>
+
+<ng-template #tooltipNot>
+    <div class="tooltipTransparent">
+    </div>
+</ng-template>
