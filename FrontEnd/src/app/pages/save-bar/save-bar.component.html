@@ -1,16 +1,16 @@
 
 <div class="right-align container-base">
     <div class="container-boxe save-bar-container row-display">
-        <button class="light-to-dark-button load-button row-display" (click)="saveLocaly()"
+        <button class="light-to-dark-button load-button row-display save-bar-button" (click)="saveLocaly()"
         ngxTooltip [template]="tooltipSaveLoc" placement="top" arrow>
             <p>Save work</p>
         </button>
-        <button class="light-to-dark-button load-button row-display" (click)="openClosePopupSave()"
+        <button class="light-to-dark-button load-button row-display save-bar-button" (click)="openClosePopupSave()"
         ngxTooltip [template]="tooltipSaveFiles" placement="top" arrow>
             <ng-icon name="heroFolderArrowDown" color="var(--icon-color)" size="30"/>
             <p>Save files</p>
         </button>
-        <button class="light-to-dark-button load-button row-display" (click)="openClosePopupDownload()"
+        <button class="light-to-dark-button load-button row-display save-bar-button" (click)="openClosePopupDownload()"
         ngxTooltip [template]="tooltipDownload" placement="top" arrow>
             <ng-icon name="heroArrowDownTraySolid" color="var(--icon-color)" size="30"/>
             <p>Download</p>
@@ -36,7 +36,7 @@
 
 <div *ngIf="openPopupSave" class="popup-container">
     <div class="popup-window-item window-item column-display">
-        <input class="path-bar" [(ngModel)]="pathSave" placeholder="Path" type="text"/>
+        <input class="path-bar" [(ngModel)]="pathSave" placeholder="Path to where copy/save playlist" type="text"/>
         <button class="light-to-dark-button load-button row-display" (click)="saveFiles()">
             <ng-icon name="heroFolderArrowDown" color="var(--icon-color)" size="30"/>
             <p>Save files</p>
@@ -49,7 +49,7 @@
 
 <div *ngIf="openPopupDownload" class="popup-container">
     <div class="popup-window-item window-item column-display">
-        <input class="path-bar" [(ngModel)]="nameDownload" placeholder="Name" type="text"/>
+        <input class="path-bar" [(ngModel)]="nameDownload" placeholder="Name of the zip file" type="text"/>
         <button class="light-to-dark-button load-button row-display" (click)="downloadFiles()">
             <ng-icon name="heroArrowDownTraySolid" color="var(--icon-color)" size="30"/>
             <p>Download</p>

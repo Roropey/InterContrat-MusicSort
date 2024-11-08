@@ -1,5 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import AudioManager from "ryan-music-player";
+import { EmptyAudioManagerService } from '../../../services/empty-audio-manager.service';
 
 @Component({
   selector: 'app-music-reader',
@@ -7,7 +8,7 @@ import AudioManager from "ryan-music-player";
   styleUrl: './music-reader.component.css'
 })
 export class MusicReaderComponent implements OnInit {
-    audioManager: AudioManager;
+    audioManager: AudioManager | EmptyAudioManagerService;
 
 
     private _volume: number = 1;
@@ -15,7 +16,12 @@ export class MusicReaderComponent implements OnInit {
     private _path: string = "";
     //['./assets/Imagine Dragons - Radioactive.mp3','assets/01 One more time.mp3','assets/04 Harder, better, faster, stronger.mp3']
     constructor(){
-      this.audioManager = new AudioManager([this.path]);
+      if (this.path.length == 0){
+        this.audioManager = new EmptyAudioManagerService();
+      }
+      else {
+        this.audioManager = new AudioManager([this.path]);
+      }
     }
     @Input()
     set path(url:string){

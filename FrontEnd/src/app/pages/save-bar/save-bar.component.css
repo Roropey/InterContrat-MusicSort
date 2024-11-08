@@ -4,7 +4,10 @@
 }
 
 .save-bar-container{
-    width:40%;
+    width:fit-content;
     padding: 0px 10px;
     justify-content: space-between;
+}
+.save-bar-button {
+    margin:5px;
 }
