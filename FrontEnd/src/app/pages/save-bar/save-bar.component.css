@@ -5,7 +5,7 @@
 
 .save-bar-container{
     width:fit-content;
-    padding: 0px 10px;
+    margin-right: -10px;
     justify-content: space-between;
 }
 .save-bar-button {
