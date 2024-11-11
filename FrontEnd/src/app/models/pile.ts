@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
 @Injectable({
   providedIn: 'root'
 })
-export class PileService<T> {
+export class Pile<T> {
   data: T[];
   sizeMax: number;
 
@@ -17,8 +17,8 @@ export class PileService<T> {
     return this.data.length
   }
 
-  clone(): PileService<T>{
-    const copy: PileService<T> = new PileService<T>(this.sizeMax)
+  clone(): Pile<T>{
+    const copy: Pile<T> = new Pile<T>(this.sizeMax)
     copy.data = [...this.data]
     return copy
   }

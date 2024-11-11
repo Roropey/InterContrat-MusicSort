@@ -18,7 +18,7 @@
         </div>
     </div>
     <div class="reading-container">
-        <app-music-reader [path]="music.access_path" [volume]="volume"/>
+        <app-music-reader [music]="music"/>
     </div>
     
     <ngx-popover #popover position="left" [bindTo]="popoverButton" [value]="popoverOpened" disabled="true"

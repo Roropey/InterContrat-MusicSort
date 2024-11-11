@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { MusicAttribute } from '../../interfaces/music-attribute';
+import { MusicAccessService } from '../../services/music-access.service';
 
 
 @Component({
@@ -13,21 +13,7 @@ export class MusicComponent {
   @Input()
   maxIndex: number = -1;
   @Input()
-  music: MusicAttribute = {
-    origin_path:"",
-    access_path:"",
-    title: "",
-    artist: "",
-    album: "",
-    image: "",
-    year: 0,
-    number: 0,
-    genre: ""
-  };
-  @Input()
-  volume: number = 1;
-
-  
+  music: MusicAccessService = new MusicAccessService(undefined)
 
   popoverOpened: boolean = false;
   countOutside: number = 0;

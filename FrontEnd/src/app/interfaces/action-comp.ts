@@ -1,8 +1,8 @@
 import { Action } from "../enumerations/action.enum";
-import { MusicAttribute } from './music-attribute';
+import { MusicAccessService } from "../services/music-access.service";
 
 export interface ActionComp {
     toDo: Action;
-    music: MusicAttribute;
+    music: MusicAccessService;
     index: number;
 }
