@@ -1,13 +1,13 @@
 
 
 export interface MusicAttribute {
-    origin_path: string;
-    access_path: string;
+    id: number;
+    accessPath: string;
     title: string;
     artist: string;
     album: string;
     image: any;
-    year: number;
+    yearRelease: number;
     number: number;
     genre: string;
 }

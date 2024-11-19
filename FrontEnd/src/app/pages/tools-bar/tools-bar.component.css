@@ -6,10 +6,13 @@
     justify-content: space-between;
 }
 
+.right-tool-container{    
+    width: 40%;
+}
 
 .search-bar{
     height: 90%;    
-    width: 50%;
+    width: 100%;
     border-radius: 10px;
     outline: none;
     display: flex;
@@ -47,7 +50,7 @@
 }
 
 .volume-range{
-    width: 60%;    
+    width: 50%;    
     align-self: center;
     margin: 0px 0px -3px 20px;
     background: var(--light-blue);

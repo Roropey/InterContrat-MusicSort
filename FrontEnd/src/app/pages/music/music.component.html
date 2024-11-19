@@ -15,10 +15,12 @@
         <div class="column-display">
             <p>Title: {{music.title}}</p>
             <p>Artist: {{music.artist}}</p>
+            <p>{{toPause}}</p>
         </div>
     </div>
     <div class="reading-container">
-        <app-music-reader [music]="music"/>
+        <app-music-reader [music]="music" [toPause]="toPause"
+        (playTriggered)="playEmit()"/>
     </div>
     
     <ngx-popover #popover position="left" [bindTo]="popoverButton" [value]="popoverOpened" disabled="true"
@@ -51,7 +53,7 @@
                 </div>
                 <div class="row-display space-between-container">
                     <p>Year:</p>
-                    <input class="info-bar" [(ngModel)]="music.year" placeholder="Year" type="text"/>
+                    <input class="info-bar" [(ngModel)]="music.yearRelease" placeholder="Year" type="text"/>
                 </div>
                 <div class="row-display space-between-container">
                     <p>Genre:</p>

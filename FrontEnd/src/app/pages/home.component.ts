@@ -14,23 +14,23 @@ import { MusicAccessService } from '../services/music-access.service';
   styleUrl: './home.component.css'
 })
 export class HomeComponent implements OnInit{
-  musicListService: ListMusicsService = new ListMusicsService();
 
 
   undoActions: Pile<ActionComp> = new Pile<ActionComp>(50);
   redoActions: Pile<ActionComp> = new Pile<ActionComp>(50);
   
+  currentPlayingIndex:number = -1;
+  
 
-  constructor(private dataService: DataService) { }
+  constructor(private dataService: DataService, private musicListService: ListMusicsService) { }
 
-  set volume(value:number){
-    this.musicListService.volume = value
-  }
+  
+
   ngOnInit(): void {
     this.dataService.getData().subscribe((data) => {
-      this.musicListService.musicList = data;
+      this.musicListService.musicList = data
     }, error => {
-      console.error('Error when taking data with data service:', error);
+      console.error('Error when taking data with data service:', error)
     });
   }
 
@@ -48,28 +48,70 @@ export class HomeComponent implements OnInit{
     this.volume = value;
   }
 
-  addIndex(index: number, element: MusicAccessService){
-    const indexReturned:number = this.musicListService.addIndex(index, element)
+  set volume(value:number){
+    this.musicListService.volume = value
+  }
+
+  get musicListLength():number{
+    return this.musicListService.length;
+  }
+
+  get musicList():MusicAccessService[]{
+    return this.musicListService.musicList;
+  }
+
+  get order():OrderStatus{
+    return this.musicListService.order;
+  }
+
+  get attributeOrder():Attribute{
+    return this.musicListService.attributeOrder;
+  }
+
+  addMusics(path:string){
+    const pass:boolean = this.musicListService.addMusics(path)
+    console.log(pass)
+  }
+
+  addIndex(indexes: number[], elements: MusicAccessService[]){
+    const indexReturned:number[] = elements.map(
+      (element,index)=>
+      this.musicListService.addIndex(indexes[index], element)
+    )
     this.undoActions.push(
       {
         toDo: Action.Remove,
-        music: element,
-        index: indexReturned
+        musics: elements,
+        indexes: indexReturned
       }
     )
   }
   
-  removeIndex(index: number) {
-    const elementReturned = this.musicListService.removeIndex(index)
-    if (elementReturned === null || elementReturned === undefined){
-      alert("No element returned from removing index "+index)
+  removeIndex(indexes: number[]) {
+    var elementsReturned: MusicAccessService[] = []
+    var indexesPass: number[] = []
+    for (let index of indexes){
+      const elementReturned = this.musicListService.removeIndex(index)
+      if (elementReturned === null || elementReturned === undefined){
+        alert("No element returned for index "+index)
+      }
+      else {
+        indexesPass.push(index)
+        elementsReturned.push(elementReturned)
+      }
+
+    }
+   
+    if (elementsReturned.length == 0)
+    {
+      alert("No element returned for some (or one) indexes")
     }
     else{
       this.undoActions.push(
         {
           toDo: Action.Add,
-          music: elementReturned,
-          index: index
+          musics: elementsReturned,
+          indexes: indexesPass
         }
       )
     }
@@ -81,8 +123,8 @@ export class HomeComponent implements OnInit{
       this.undoActions.push(
         {
           toDo: Action.MoveDown,
-          music: new MusicAccessService(undefined),
-          index: index - 1
+          musics: [new MusicAccessService(undefined)],
+          indexes: [index - 1]
         }
       )
     }
@@ -93,15 +135,15 @@ export class HomeComponent implements OnInit{
       this.undoActions.push(
         {
           toDo: Action.MoveUp,
-          music: new MusicAccessService(undefined),
-          index: index + 1
+          musics: [new MusicAccessService(undefined)],
+          indexes: [index + 1]
         }
       )
     }
   }
 
-  addMusics(path:string){
-    this.musicListService.addMusics(path)
+  playEmit(index:number){
+    this.currentPlayingIndex = index
   }
 
   undoAction(){
@@ -111,16 +153,16 @@ export class HomeComponent implements OnInit{
     } else {
       switch(actionDone.toDo){
         case Action.Add:
-          this.addIndex(actionDone.index,actionDone.music)
+          this.addIndex(actionDone.indexes,actionDone.musics)
           break
         case Action.Remove:
-          this.removeIndex(actionDone.index)
+          this.removeIndex(actionDone.indexes)
           break
         case Action.MoveUp:
-          this.upperMoveIndex(actionDone.index)
+          this.upperMoveIndex(actionDone.indexes[0])
           break
         case Action.MoveDown:
-          this.downMoveIndex(actionDone.index)
+          this.downMoveIndex(actionDone.indexes[0])
           break
       }
       const actionToRedo = this.undoActions.pop()
@@ -140,16 +182,16 @@ export class HomeComponent implements OnInit{
     } else {
       switch(actionDone.toDo){
         case Action.Add:
-          this.addIndex(actionDone.index,actionDone.music)
+          this.addIndex(actionDone.indexes,actionDone.musics)
           break
         case Action.Remove:
-          this.removeIndex(actionDone.index)
+          this.removeIndex(actionDone.indexes)
           break
         case Action.MoveUp:
-          this.upperMoveIndex(actionDone.index)
+          this.upperMoveIndex(actionDone.indexes[0])
           break
         case Action.MoveDown:
-          this.downMoveIndex(actionDone.index)
+          this.downMoveIndex(actionDone.indexes[0])
           break
       }
     }

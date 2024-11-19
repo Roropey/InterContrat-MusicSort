@@ -1,6 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
-import AudioManager from "ryan-music-player";
-import { EmptyAudioManagerService } from '../../../models/empty-audio-manager';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { MusicAccessService } from '../../../services/music-access.service';
 
 @Component({
@@ -11,8 +9,17 @@ import { MusicAccessService } from '../../../services/music-access.service';
 export class MusicReaderComponent implements OnInit {
 
     @Input()
-
     music:MusicAccessService = new MusicAccessService(undefined)
+    @Input()
+    set toPause(toPause:boolean){
+      if(toPause){
+        this.pauseAudio()
+      }
+    }
+    
+
+    @Output()
+    playTriggered: EventEmitter<void> = new EventEmitter<void>();
 
     get currentTime(){
       return this.music.currentTime
@@ -29,6 +36,7 @@ export class MusicReaderComponent implements OnInit {
     }
     playAudio() {
       this.music.playAudio();
+      this.playTriggered.emit();
     }
   
     pauseAudio() {

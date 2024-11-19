@@ -14,21 +14,26 @@ export class MusicComponent {
   maxIndex: number = -1;
   @Input()
   music: MusicAccessService = new MusicAccessService(undefined)
+  @Input()
+  toPause:boolean = false;
 
   popoverOpened: boolean = false;
   countOutside: number = 0;
   @Output()
-  deleteTriggered: EventEmitter<number> = new EventEmitter<number>();
+  deleteTriggered: EventEmitter<number[]> = new EventEmitter<number[]>();
   @Output()
   upperTriggered: EventEmitter<number> = new EventEmitter<number>();
   @Output()
   downTriggered: EventEmitter<number> = new EventEmitter<number>();
+  @Output()
+  playTriggered: EventEmitter<number> = new EventEmitter<number>();
+
 
   countPlusOutside(param:any){
     this.countOutside++
   }
   deleteMusic(){
-    this.deleteTriggered.emit(this.index);
+    this.deleteTriggered.emit([this.index]);
   }
 
   moveUpMusic(){
@@ -49,6 +54,11 @@ export class MusicComponent {
 
   closePopover() {
     this.popoverOpened = false
+  }
+
+  playEmit(){
+    this.toPause = false;
+    this.playTriggered.emit(this.index);
   }
 
 }

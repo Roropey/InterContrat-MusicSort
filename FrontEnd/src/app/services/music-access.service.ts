@@ -10,25 +10,27 @@ export class MusicAccessService {
 
   private _musicAttribute: MusicAttribute;
   private _audioManager: AudioManager | EmptyAudioManagerService;
+  
+  private apiUrl ="http://localhost:8080/audio";
 
   constructor(@Inject(undefined) musicAttribute:MusicAttribute | undefined) {
     if (musicAttribute === undefined){      
       this._musicAttribute = {
-        origin_path:"",
-        access_path:"",
+        id:-1,
+        accessPath:"",
         title: "",
         artist: "",
         album: "",
         image: "",
-        year: 0,
-        number: 0,
+        yearRelease: -1,
+        number: -1,
         genre: ""
       };
       this._audioManager = new EmptyAudioManagerService();
     } 
     else {  
       this._musicAttribute = musicAttribute
-      this._audioManager = new AudioManager([musicAttribute.access_path])
+      this._audioManager = new AudioManager([musicAttribute.accessPath == "" ? this.apiUrl+"/"+musicAttribute.id : musicAttribute.accessPath])
     }
   }
 
@@ -53,11 +55,11 @@ export class MusicAccessService {
   get image():any {
     return this._musicAttribute.image
   }
-  set year(value:number){
-    this._musicAttribute.year = value
+  set yearRelease(value:number){
+    this._musicAttribute.yearRelease = value
   }
-  get year():number{
-    return this._musicAttribute.year
+  get yearRelease():number{
+    return this._musicAttribute.yearRelease
   }
   set number(value:number){
     this._musicAttribute.number = value
@@ -86,9 +88,7 @@ export class MusicAccessService {
     return this._audioManager.getDuration()     
   }
   set currentTime(value: number){
-    this._audioManager.pause()
     this._audioManager.seek(value*this._audioManager.getDuration())
-    this._audioManager.play()
   }
   playAudio() {
     this._audioManager.play();

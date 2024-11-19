@@ -1,4 +1,6 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject } from '@angular/core';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { MusicAttribute } from '../interfaces/music-attributes-given';
 import { OrderStatus, Attribute } from '../enumerations/ordering.enum';
 import { MusicAccessService } from './music-access.service';
@@ -13,8 +15,12 @@ export class ListMusicsService {
 
   private _order: OrderStatus = 0; 
   private _attributeOrder: Attribute = Attribute.Title;
+  
+  private apiUrl ="http://localhost:8080/audio";
 
-  constructor() { }
+  constructor(@Inject(HttpClient) private http: HttpClient) { }
+
+  
 
   get musicList(){
     return this._musicList
@@ -76,7 +82,7 @@ export class ListMusicsService {
     })
   }
 
-  length(): number {
+  get length(): number {
     return this._musicList.length
   }
 
@@ -107,10 +113,40 @@ export class ListMusicsService {
     )    
   }
 
-  addMusics(path:string){
+  addMusics(path:string):boolean{
     const new_path: string = path.replaceAll("\\","/")
     alert("Add from "+new_path)
+    var pass: boolean = false
+    this.getMusicAttribute(path).subscribe({
+      next:(data)=>{
+        alert("Receive "+data)
+        console.log("Pass receiving")
+        const musics: MusicAttribute[] = data
+        alert("Transmort into "+musics)
+        console.log("Pass transform")
+        if (musics){
+          musics.map((music)=> this.addIndex(-1,new MusicAccessService(music)))
+          //this.addIndex(-1, new MusicAccessService(music))
+          pass = true
+        }
+        
+      },
+      error:(err) => {
+        alert("Receive error" + err)
+        console.error('Error retrieving music attributes:', err)
+      },
+    })
+    return pass
   }
+
+  getMusicAttribute(path:string):Observable<MusicAttribute[]>{
+    const params = new HttpParams().set('filePath',path);
+    const headers = new HttpHeaders().set('Accept','application/json');
+    return this.http.get<MusicAttribute[]>(this.apiUrl+"/upload", {params, headers})
+  }
+/*
+http://localhost:8080/audio/upload?filePath=C:/Users/rpeyremorte/Documents/Projet inter-contrat/Trieur de musique/InterContrat-MusicSort/FrontEnd/src/assets/01 One more time.mp3
+*/
   addIndex(index: number, element: MusicAccessService): number{
     if (index != -1 && index<this._musicList.length) {
       this._musicList.splice(index,0,element)
@@ -151,6 +187,18 @@ export class ListMusicsService {
     else {
       return false
     }
+  }
+  saveWork(){
+    alert("Receive poke to save locally the work")
+  }
+
+  saveFiles(path: string){
+    const new_path: string = path.replaceAll("//","/")
+    alert("Receive "+new_path+" to save/copy the files there")
+  }
+
+  downloadFiles(name: string){
+    alert("Receive the name "+name+" for the zip folder of all musics")
   }
 
   resumeList():MusicAttribute[]{
