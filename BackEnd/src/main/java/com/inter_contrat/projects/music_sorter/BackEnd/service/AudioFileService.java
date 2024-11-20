@@ -1,19 +1,31 @@
 package com.inter_contrat.projects.music_sorter.BackEnd.service;
-import com.inter_contrat.projects.music_sorter.BackEnd.repository.AudioFileRepository;
 import com.inter_contrat.projects.music_sorter.BackEnd.model.AudioFile;
+import com.inter_contrat.projects.music_sorter.BackEnd.repository.AudioFileRepository;
+import com.inter_contrat.projects.music_sorter.BackEnd.model.MusicAttribute;
+import org.apache.tika.parser.audio.AudioParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.sound.sampled.AudioFileFormat;
-import javax.sound.sampled.AudioSystem;
-import java.io.File;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.parser.Parser;
+import org.apache.tika.parser.ParseContext;
+import org.apache.tika.sax.BodyContentHandler;
+import org.apache.tika.parser.mp3.Mp3Parser;
+
+
+
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Optional;
+
+import java.nio.file.*;
+
+
+import jakarta.transaction.Transactional;
+
+import java.io.File;
+import java.util.*;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 @Service
 public class AudioFileService {
@@ -21,49 +33,115 @@ public class AudioFileService {
     @Autowired
     private AudioFileRepository audioFileRepository;
 
-    private final String audioDirectory = "audio-files"; // Répertoire où les fichiers audio sont stockés
+    private List<Path> findAllFiles(String directoryPath) throws IOException {
+        List<Path> fileList = new ArrayList<>();
+        Path path = Paths.get(directoryPath);
 
-    public void saveAudioFile(MultipartFile file) throws IOException {
-        // Créez un fichier sur le serveur
-        Path path = Paths.get(audioDirectory, file.getOriginalFilename());
-        Files.createDirectories(path.getParent());
-        file.transferTo(path);
+        if  (!Files.exists(path) || !Files.isDirectory(path)) {
+            throw new IllegalArgumentException("Path does not correspond to a file or a directory.");
+        }
 
-        // Récupérer les métadonnées (exemple simple, à adapter selon le format audio)
-        AudioFile audioFile = new AudioFile();
-        audioFile.setFileName(file.getOriginalFilename());
-        audioFile.setFilePath(path.toString());
-        audioFile.setFileSize(file.getSize());
-        audioFile.setCreatedAt(LocalDateTime.now());
+        try(Stream<Path> stream = Files.walk(path)) {
+            stream.filter(Files::isRegularFile)
+                    .forEach(fileList::add);
+        }
 
-        // Exemple de traitement pour extraire des métadonnées (comme le titre et l'artiste)
-        try {
-            AudioFileFormat format = AudioSystem.getAudioFileFormat(path.toFile());
-            // Ici, on peut extraire les métadonnées si elles sont disponibles dans le fichier
-            // AudioFileFormat n'a pas de méthode directe pour extraire des métadonnées comme l'artiste ou le titre
-            // Cependant, vous pourriez utiliser des bibliothèques externes comme MP3agic pour gérer cela.
+        return fileList;
+    }
+
+    private Map<String,String> getAttributes(File file) {
+        Map<String,String> attributes = new HashMap<>();
+        // Extraire les métadonnées du fichier audio
+        BodyContentHandler handler = new BodyContentHandler();
+        Metadata metadata = new Metadata();
+        ParseContext context = new ParseContext();
+        Parser parser = file.getAbsolutePath().endsWith("mp3") ?
+                new Mp3Parser() : new AudioParser();
+        try (FileInputStream inputStream = new FileInputStream(file)) {
+            parser.parse(inputStream, handler, metadata, context);
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+        if (metadata.get("X-TIKA:EXCEPTION:warn")==null){
+            String[] tmpPath = file.getAbsolutePath().split(Pattern.quote(File.separator));
+            attributes.put("title", metadata.get("dc:title")==null ? tmpPath[tmpPath.length-1] : metadata.get("dc:title"));
+            attributes.put("artist", metadata.get("xmpDM:artist"));
+            attributes.put("album", metadata.get("xmpDM:album"));
+            attributes.put("yearRelease", metadata.get("xmpDM:releaseDate"));
+            attributes.put("number", metadata.get("xmpDM:trackNumber"));
+            attributes.put("genre", metadata.get("xmpDM:genre"));
+            attributes.put("image", metadata.get("xmpDM:albumArtURI"));        }
+        else {
+            attributes.put("error", "true");
         }
 
-        audioFileRepository.save(audioFile);
+        System.out.println(attributes);
+        return attributes;
     }
 
-    public List<AudioFile> getAllAudioFiles() {
-        return audioFileRepository.findAll();
-    }
-
-    public Optional<AudioFile> getAudioFileById(Long id) {
-        return audioFileRepository.findById(id);
-    }
-
-    public void updateMetadata(Long id, String artist, String title) {
-        Optional<AudioFile> audioFileOptional = audioFileRepository.findById(id);
-        if (audioFileOptional.isPresent()) {
-            AudioFile audioFile = audioFileOptional.get();
-            audioFile.setArtist(artist);
-            audioFile.setTitle(title);
+    public Optional<MusicAttribute> saveAudioFileFromFile(File file) {
+        Map<String,String> attributes = getAttributes(file);
+        if (attributes.containsKey("error")) {
+            return Optional.empty();
+        }
+        else {
+            AudioFile audioFile = new AudioFile();
+            audioFile.setTitle(attributes.get("title"));
+            audioFile.setArtist(attributes.get("artist"));
+            audioFile.setPath(file.getAbsolutePath());
+            audioFile.setAlbum(attributes.get("album"));
+            audioFile.setYearRelease(attributes.get("yearRelease") == null ? -1 : Integer.parseInt(attributes.get("yearRelease")));
+            audioFile.setNumber(attributes.get("number") == null ? -1 : Integer.parseInt(attributes.get("number")));
+            audioFile.setGenre(attributes.get("genre"));
+            audioFile.setCreatedAt(new java.util.Date());
             audioFileRepository.save(audioFile);
+            return Optional.ofNullable(audioFile.getMusicAttribute());
         }
+    }
+
+    public List<MusicAttribute> saveAudioFilesFromDirectoryPath(String directoryPath) {
+        try {
+            List<Path> filesPath = findAllFiles(directoryPath);
+            List<MusicAttribute> musics = new ArrayList<>();
+            for (Path path : filesPath) {
+                Optional<AudioFile> music = findByPath(path.toString());
+                if (music.isPresent()) {
+                     musics.add(music.get().getMusicAttribute());
+                }
+                else {
+                    File file = path.toFile();
+                     Optional<MusicAttribute> musicAttribute = saveAudioFileFromFile(file);
+                    musicAttribute.ifPresent(musics::add);
+                }
+            }
+            return musics;
+        } catch (IOException e) {
+            throw new RuntimeException("Catch exception when trying find all files:" + e);
+        }
+        
+    }
+
+
+
+    @Transactional
+    public void updateAudioMetadata(Long id, String title, String artist) {
+        AudioFile audioFile = audioFileRepository.findById(id).orElseThrow();
+        audioFile.setTitle(title);
+        audioFile.setArtist(artist);
+    }
+
+    public MusicAttribute getAudioFileMetadata(Long id) {
+        AudioFile audioFile = audioFileRepository.findById(id).orElseThrow(() -> new RuntimeException("Audio file not found"));
+        return audioFile.getMusicAttribute();
+    }
+
+    public File getAudioFile(Long id) {
+        AudioFile audioFile = audioFileRepository.findById(id).orElseThrow(() -> new RuntimeException("Audio file not found"));
+        return new File(audioFile.getPath());
+    }
+
+    public Optional<AudioFile> findByPath(String path) {
+        return audioFileRepository.findByPath(path);
     }
 }
+

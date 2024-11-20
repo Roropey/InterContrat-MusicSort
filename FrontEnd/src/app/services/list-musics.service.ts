@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { MusicAttribute } from '../interfaces/music-attributes-given';
 import { OrderStatus, Attribute } from '../enumerations/ordering.enum';
 import { MusicAccessService } from './music-access.service';
@@ -115,21 +115,24 @@ export class ListMusicsService {
 
   addMusics(path:string):boolean{
     const new_path: string = path.replaceAll("\\","/")
-    alert("Add from "+new_path)
     var pass: boolean = false
     this.getMusicAttribute(path).subscribe({
       next:(data)=>{
-        alert("Receive "+data)
-        console.log("Pass receiving")
         const musics: MusicAttribute[] = data
-        alert("Transmort into "+musics)
-        console.log("Pass transform")
         if (musics){
-          musics.map((music)=> this.addIndex(-1,new MusicAccessService(music)))
+          musics.map((music)=> 
+            this.getAudio(music.id).subscribe(
+              (audioBlob) => {
+                this.addIndex(-1,new MusicAccessService(music, audioBlob))
+                pass = true
+              },
+              (err) => {
+                alert("Error getting audio blob " + err)
+              }
+            )           
           //this.addIndex(-1, new MusicAccessService(music))
-          pass = true
-        }
-        
+          )
+        }        
       },
       error:(err) => {
         alert("Receive error" + err)
@@ -143,6 +146,10 @@ export class ListMusicsService {
     const params = new HttpParams().set('filePath',path);
     const headers = new HttpHeaders().set('Accept','application/json');
     return this.http.get<MusicAttribute[]>(this.apiUrl+"/upload", {params, headers})
+  }
+
+  getAudio(index:number):Observable<Blob>{
+    return this.http.get(this.apiUrl+"/"+index,{responseType:'blob'})
   }
 /*
 http://localhost:8080/audio/upload?filePath=C:/Users/rpeyremorte/Documents/Projet inter-contrat/Trieur de musique/InterContrat-MusicSort/FrontEnd/src/assets/01 One more time.mp3
