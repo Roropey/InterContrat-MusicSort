@@ -1,6 +1,8 @@
 import { Injectable, Inject } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { catchError, mergeMap, map, Observable, throwError, tap, forkJoin, merge, switchMap, of } from 'rxjs';
+import { Pile } from '../models/pile';
+import { ActionComp } from '../interfaces/action-comp';
 import { MusicAttribute } from '../interfaces/music-attributes-given';
 import { OrderStatus, Attribute } from '../enumerations/ordering.enum';
 import { MusicAccessService } from './music-access.service';
@@ -15,7 +17,7 @@ export class ListMusicsService {
 
   private _order: OrderStatus = 0; 
   private _attributeOrder: Attribute = Attribute.Title;
-  
+
   private apiUrl ="http://localhost:8080/audio";
 
   constructor(@Inject(HttpClient) private http: HttpClient) { }
@@ -113,33 +115,35 @@ export class ListMusicsService {
     )    
   }
 
-  addMusics(path:string):boolean{
-    const new_path: string = path.replaceAll("\\","/")
-    var pass: boolean = false
-    this.getMusicAttribute(path).subscribe({
-      next:(data)=>{
-        const musics: MusicAttribute[] = data
-        if (musics){
-          musics.map((music)=> 
-            this.getAudio(music.id).subscribe(
-              (audioBlob) => {
-                this.addIndex(-1,new MusicAccessService(music, audioBlob))
-                pass = true
-              },
-              (err) => {
-                alert("Error getting audio blob " + err)
-              }
-            )           
-          //this.addIndex(-1, new MusicAccessService(music))
+  addMusics(path:string):Observable<number[]>{
+    return this.getMusicAttribute(path).pipe(
+      catchError((error) => {
+        
+        return throwError(() => new Error("Error retrieving music attributes "+error))
+      }),
+      switchMap((musics: MusicAttribute[]) => {
+        if (musics) {
+          const audioRequests:Observable<number>[] = musics.map((music) =>
+            this.getAudio(music.id).pipe(
+              catchError((error) => {
+                return throwError(() => new Error("Error retrieving audio blob " + error))
+              }),
+              map((audioBlob: Blob) => {
+                return this.addIndex(-1,new MusicAccessService(music, audioBlob))
+              })
+            )
           )
-        }        
-      },
-      error:(err) => {
-        alert("Receive error" + err)
-        console.error('Error retrieving music attributes:', err)
-      },
-    })
-    return pass
+          // Transform the Observal<number>[] into the form that permit to have the right type for return
+          return forkJoin(audioRequests).pipe(
+            map((musicAccessServices: number[]) => {
+              return musicAccessServices
+            })
+          );
+        } else {
+          return throwError(() => new Error("Error type of received music"));
+        }
+      })
+    )
   }
 
   getMusicAttribute(path:string):Observable<MusicAttribute[]>{
@@ -172,7 +176,7 @@ http://localhost:8080/audio/upload?filePath=C:/Users/rpeyremorte/Documents/Proje
       return removed;      
     }
     else {
-      alert("Index not in musicList");
+      alert("Index "+index+"not in musicList");
       return undefined
     }
   }

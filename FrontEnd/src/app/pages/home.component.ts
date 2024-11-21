@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { DataService } from "../services/data.service";
 import { ListMusicsService } from '../services/list-musics.service';
-import { Pile } from '../models/pile';
 import { OrderStatus, Attribute } from '../enumerations/ordering.enum';
 import { Action } from "../enumerations/action.enum";
 import { MusicAttribute } from '../interfaces/music-attributes-given';
+import { Pile } from '../models/pile';
 import { ActionComp } from '../interfaces/action-comp';
 import { MusicAccessService } from '../services/music-access.service';
 
@@ -69,8 +69,17 @@ export class HomeComponent implements OnInit{
   }
 
   addMusics(path:string){
-    const pass:boolean = this.musicListService.addMusics(path)
-    console.log(pass)
+    // Subscribe to add into actions after receiving the results
+    this.musicListService.addMusics(path).subscribe((indexes) => {
+      this.undoActions.push(
+        {
+          toDo: Action.Remove,
+          musics: [new MusicAccessService(undefined)],
+          indexes: indexes.sort((a,b)=> (a<=b ? 1 : -1))
+        }
+      )
+      console.log(this.undoAction.length)
+    })
   }
 
   addIndex(indexes: number[], elements: MusicAccessService[]){
@@ -100,8 +109,7 @@ export class HomeComponent implements OnInit{
         elementsReturned.push(elementReturned)
       }
 
-    }
-   
+    }   
     if (elementsReturned.length == 0)
     {
       alert("No element returned for some (or one) indexes")

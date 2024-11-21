@@ -28,6 +28,10 @@ export class MusicReaderComponent implements OnInit {
       return this.music.duration
     }
 
+    get isFinite():boolean{
+      return Number.isFinite(this.duration)
+    }
+
     set currentTime(value: number){
       this.music.currentTime = value
     }
