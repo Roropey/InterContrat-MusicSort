@@ -8,24 +8,25 @@
             <ng-icon name="heroChevronDownSolid" color="var(--color-green)" size="40"/>
         </button>
     </div>
-    <div class=" img-tit-art-container">
+    <div class="row-display img-tit-art-container">
+        <!--
         <div *ngIf="music.image">
-            <p>music.image</p>
+            <img [src]="music.image"/>
         </div>
+        -->
         <div class="column-display">
             <p>Title: {{music.title}}</p>
             <p>Artist: {{music.artist}}</p>
         </div>
     </div>
     <div class="reading-container">
-        <app-music-reader [music]="music" [toPause]="toPause"
-        (playTriggered)="playEmit()"/>
+        <app-music-reader [music]="music"/>
     </div>
     
-    <ngx-popover #popover position="left" [bindTo]="popoverButton" [value]="popoverOpened" disabled="true"
+    <ngx-popover #popover class="info-icon-container" position="left" [bindTo]="popoverButton" [value]="popoverOpened" disabled="true"
     (clickOutside)="countPlusOutside($event)" (valueChange)="setPopoverValue($event)">    
         <div #popoverButton>
-            <button class="info-icon-container dark-blue-icon red-icon icon-button" (click)="popoverOpened ? closePopover() : popover.open()"
+            <button class="dark-blue-icon red-icon icon-button" (click)="popoverOpened ? closePopover() : popover.open()"
             ngxTooltip [template]="popoverOpened ? tooltipNot : tooltipInfos">
                 <ng-icon *ngIf="popoverOpened" name="heroXMarkSolid" color="var(--color-red)" size="70"/>  
                 <ng-icon *ngIf="!popoverOpened" name="heroInformationCircle" color="var(--color-d-blue)" size=70/>
@@ -33,7 +34,11 @@
         </div>  
          
         <ng-template ngx-popover-template>
-            <div class="window-item popover-container column-display">          
+            <div class="window-item popover-container column-display"> 
+                <div class="row-display space-between-container info-line">
+                    <p>File name:</p>
+                    <input class="info-bar" [(ngModel)]="music.fileName" placeholder="File name" type="text"/>
+                </div>         
                 <div class="row-display space-between-container">
                     <p>Title:</p>
                     <input class="info-bar" [(ngModel)]="music.title" placeholder="Title" type="text"/>

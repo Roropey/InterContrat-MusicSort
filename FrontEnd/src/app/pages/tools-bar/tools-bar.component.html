@@ -20,12 +20,20 @@
                 <div [ngClass]="{'orderingTextNotSelected': (attributeOrder==attribute.Artist && order==0) || attributeOrder!=attribute.Artist, 'orderingTextSelected': attributeOrder==attribute.Artist && order!=0}">Artist</div>
             </button>
         </div>
-        <div class="row-display left-tool-container non-scrollable">
+        <div class="left-tool-container non-scrollable">
+            
+            <button class="icon-button white-icon" (click)="sendPlayStrat()"
+            ngxTooltip [template]="tooltipPlayStrat">       
+                <ng-icon *ngIf="playStratApplied==playStrat.Stop" name="bootstrapIndent" color="var(--color-white)" size="45"/>
+                <ng-icon *ngIf="playStratApplied==playStrat.Loop" name="bootstrapRepeat" color="var(--color-white)" size="45"/>
+                <ng-icon *ngIf="playStratApplied==playStrat.Next" name="bootstrapTextWrap" color="var(--color-white)" size="45"/>
+                
+            </button>
             <div class = "volume-container row-display">
-                <div class="volume-icon">
-                <ng-icon *ngIf="volume>0" name="heroSpeakerWaveSolid" color="var(--white)" size="40"/>
-                <ng-icon *ngIf="volume==0" name="heroSpeakerXMarkSolid" color="var(--white)" size="40"/>
-            </div>
+                <button class="icon-button white-icon" (click)="mute()">
+                    <ng-icon *ngIf="volume>0" name="heroSpeakerWaveSolid" color="var(--color-white)" size="40"/>
+                    <ng-icon *ngIf="volume==0" name="heroSpeakerXMarkSolid" color="var(--color-white)" size="40"/>
+                </button>
                 <input class="volume-range" type="range" min="0" max="1" step="0.05" [(ngModel)]="volume">  
             </div>                         
             <button class="white-icon icon-button" (click)="openClosePopupAdd()"
@@ -47,7 +55,7 @@
 
 <div *ngIf="openPopupAdd" class="popup-container">
     <div class="popup-window-item window-item column-display">
-        <input class="path-bar" [(ngModel)]="pathAdd" placeholder="Path to folder" type="text"/>
+        <input class="path-bar" [(ngModel)]="pathAdd" placeholder="Path to folder" type="text" (keydown.enter)="loadMusics()" (keydown.escape)="openClosePopupAdd()"/>
         <button class="light-to-dark-button load-button row-display" (click)="loadMusics()">
             <ng-icon name="heroDocumentPlus" color="var(--icon-color)" size="30"/>
             <p>Load</p>
@@ -58,6 +66,12 @@
     </div>
 </div>
 
+
+<ng-template #tooltipPlayStrat>
+    <div class="tooltip-item">
+        <p>{{playStratApplied}}</p>
+    </div>
+</ng-template>
 <ng-template #tooltipAdd>
     <div class="tooltip-item">
         <p>Add music</p>

@@ -36,7 +36,7 @@
 
 <div *ngIf="openPopupSave" class="popup-container">
     <div class="popup-window-item window-item column-display">
-        <input class="path-bar" [(ngModel)]="pathSave" placeholder="Path to where copy/save playlist" type="text"/>
+        <input class="path-bar" [(ngModel)]="pathSave" placeholder="Path to where copy/save playlist" type="text" (keydown.enter)="saveFiles()" (keydown.escape)="openClosePopupSave()"/>
         <button class="light-to-dark-button load-button row-display" (click)="saveFiles()">
             <ng-icon name="heroFolderArrowDown" color="var(--icon-color)" size="30"/>
             <p>Save files</p>
@@ -49,7 +49,7 @@
 
 <div *ngIf="openPopupDownload" class="popup-container">
     <div class="popup-window-item window-item column-display">
-        <input class="path-bar" [(ngModel)]="nameDownload" placeholder="Name of the zip file" type="text"/>
+        <input class="path-bar" [(ngModel)]="nameDownload" placeholder="Name of the zip file" type="text" (keydown.enter)="downloadFiles()" (keydown.escape)="openClosePopupDownload()"/>
         <button class="light-to-dark-button load-button row-display" (click)="downloadFiles()">
             <ng-icon name="heroArrowDownTraySolid" color="var(--icon-color)" size="30"/>
             <p>Download</p>

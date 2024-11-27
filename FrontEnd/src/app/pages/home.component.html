@@ -1,19 +1,20 @@
 <div class="content column-display">
       
-    <app-tools-bar [order]="order" [attributeOrder]="attributeOrder" [cantUndo]="undoActions.isEmpty()" [cantRedo]="redoActions.isEmpty()"
+    <app-tools-bar [order]="order" [attributeOrder]="attributeOrder" [playStratApplied]="playStrat"
+    [cantUndo]="undoActions.isEmpty()" [cantRedo]="redoActions.isEmpty()"
     (searchTriggered)="searchMusicList($event)" (orderTriggered)="ordering($event)" (volumeTriggered)="modifVolume($event)" 
-    (addTriggered)="addMusics($event)" (undoTriggered)="undoAction()" (redoTriggered)="redoAction()"/>
+    (addTriggered)="addMusics($event)" (changeStratTriggered)="changePlayState()" (undoTriggered)="undoAction()" (redoTriggered)="redoAction()"/>
 
 
     <div class="container-base container-boxe ">
       <div class="music-list-boxe">
           <tr *ngFor="let music of musicList, let i = index">
-              <app-music [index]="i" [maxIndex]="musicListLength" [music]=music [toPause]="i!=currentPlayingIndex"
-              (deleteTriggered)="removeIndex($event)" (upperTriggered)="upperMoveIndex($event)" (downTriggered)="downMoveIndex($event)" (playTriggered)="playEmit($event)"/>
+              <app-music [index]="i" [maxIndex]="musicListLength" [music]=music
+              (deleteTriggered)="removeIndex($event)" (upperTriggered)="upperMoveIndex($event)" (downTriggered)="downMoveIndex($event)"/>
           </tr>
       </div>
     </div>
     <app-save-bar (saveWorkTriggered)="saveWork()" (saveFilesTriggered)="saveFiles($event)" (downloadTriggered)="downloadFiles($event)"/>
     
-    <p>Affiché : {{musicListLength}}, order : {{order}}, volume : {{volume}}, size undo : {{undoActions.length()}}, size redo : {{redoActions.length()}}, current playing : {{currentPlayingIndex}}</p>
+    <p>Affiché : {{musicListLength}}, order : {{order}}, volume : {{volume}}, size undo : {{undoActions.length()}}, size redo : {{redoActions.length()}}</p>
 </div>

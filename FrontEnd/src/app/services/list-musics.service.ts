@@ -5,44 +5,58 @@ import { Pile } from '../models/pile';
 import { ActionComp } from '../interfaces/action-comp';
 import { MusicAttribute } from '../interfaces/music-attributes-given';
 import { OrderStatus, Attribute } from '../enumerations/ordering.enum';
-import { MusicAccessService } from './music-access.service';
+import { MusicAccess } from '../models/music-access';
+import { CommunicationService } from './communication.service';
+import { ComComposition } from '../interfaces/com-composition';
+import { PlayAction, PlayStrat } from '../enumerations/play-strat';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ListMusicsService {
 
-  private _musicList: MusicAccessService[] = [];
-  private _musicListRetired: MusicAccessService[] = [];
+  private _musicList: MusicAccess[] = [];
+  private _musicListRetired: MusicAccess[] = [];
 
   private _order: OrderStatus = 0; 
   private _attributeOrder: Attribute = Attribute.Title;
+  private _currentPlayingIndex:number = -1;
+  private _playStrat: PlayStrat = PlayStrat.Stop;
 
   private apiUrl ="http://localhost:8080/audio";
 
-  constructor(@Inject(HttpClient) private http: HttpClient) { }
+  constructor(@Inject(HttpClient) private http: HttpClient, private communicationService: CommunicationService) {
+    this.communicationService.getSignal().subscribe(event=>{
+      this.interpretCom(event)
+    })
+   }
 
   
 
-  get musicList(){
+  get musicList():MusicAccess[]{
     return this._musicList
   }
-  set musicList(list: any[]){
-    this._musicList = list.map((element => new MusicAccessService(element)))
+  set musicList(list: MusicAccess[]){
+    this._musicList = list
     if (this._order != 0){
       this._musicList.sort((a, b) => {
         if (a[this._attributeOrder] > b[this._attributeOrder]) return this._order;
         if (a[this._attributeOrder] < b[this._attributeOrder]) return -this._order;
         return 0;
       })
-    }    
+    }   
+    this.updateMusicListIndexes()
+  }
+
+  updateMusicListIndexes(){
+    this._musicList.map((element,index) => element.index = index)
   }
 
   get musicListRetired(){
     return this._musicListRetired
   }
 
-  set musicListRetired(list: any[]){
+  set musicListRetired(list: MusicAccess[]){
     this._musicListRetired = list
   }
 
@@ -75,6 +89,23 @@ export class ListMusicsService {
     return this._order
   }
 
+  changePlayStrat(){
+    switch (this._playStrat){
+      case PlayStrat.Stop:
+        this._playStrat = PlayStrat.Loop
+        break
+      case PlayStrat.Loop:
+        this._playStrat = PlayStrat.Next
+        break
+      case PlayStrat.Next:
+        this._playStrat = PlayStrat.Stop
+    }
+  }
+  
+  get playStrat():PlayStrat{
+    return this._playStrat
+  }
+
   set volume(value:number) {
     this._musicList.forEach(element => {
       element.volume = value
@@ -84,8 +115,43 @@ export class ListMusicsService {
     })
   }
 
+  set currentPlayingIndex(value:number){
+    if (this._currentPlayingIndex >=0) {
+      this._musicList[this._currentPlayingIndex].pauseAudio()
+    }
+    this._currentPlayingIndex = value
+  }
+
   get length(): number {
     return this._musicList.length
+  }
+
+  interpretCom(comComp: ComComposition){
+    switch (comComp.action){
+      case PlayAction.Play:
+        this.currentPlayingIndex = comComp.index
+        break
+      case PlayAction.Pause:
+        ;;
+        break
+      case PlayAction.Stop:
+        ;;
+        break
+      case PlayAction.End:
+        switch (this._playStrat){
+          case PlayStrat.Loop:
+            this._musicList[comComp.index].playAudio()
+            break
+          case PlayStrat.Next:
+            this._musicList[comComp.index].stopAudio()
+            const nextIndex = comComp.index + 1 == this.length ? 0 : comComp.index + 1
+            this._musicList[nextIndex].playAudio()
+            break
+          case PlayStrat.Stop:
+            this._musicList[comComp.index].stopAudio()
+        }
+
+    }
   }
 
   searchMusicList(searchText: string) {
@@ -94,10 +160,10 @@ export class ListMusicsService {
     this.musicListRetired = this.musicList.filter(
       (music) => {
         return !searchTextSplit.reduce(
-          (accumulator, word) =>
-            accumulator && 
-          (music.title.toLowerCase().includes(word.toLocaleLowerCase()) ||
-           music.artist.toLowerCase().includes(word.toLocaleLowerCase())),
+          (accumulator, word) => {
+          return accumulator && 
+          ((music.title!=null && music.title.toLowerCase().includes(word.toLocaleLowerCase())) ||
+           (music.artist!=null && music.artist.toLowerCase().includes(word.toLocaleLowerCase())))},
           true
         )
       }
@@ -107,8 +173,8 @@ export class ListMusicsService {
         return searchTextSplit.reduce(
           (accumulator, word) =>
             accumulator && 
-          (music.title.toLowerCase().includes(word.toLocaleLowerCase()) ||
-           music.artist.toLowerCase().includes(word.toLocaleLowerCase())),
+          ((music.title!=null && music.title.toLowerCase().includes(word.toLocaleLowerCase())) ||
+           (music.artist!=null && music.artist.toLowerCase().includes(word.toLocaleLowerCase()))),
           true
         )
       }
@@ -118,7 +184,6 @@ export class ListMusicsService {
   addMusics(path:string):Observable<number[]>{
     return this.getMusicAttribute(path).pipe(
       catchError((error) => {
-        
         return throwError(() => new Error("Error retrieving music attributes "+error))
       }),
       switchMap((musics: MusicAttribute[]) => {
@@ -129,7 +194,7 @@ export class ListMusicsService {
                 return throwError(() => new Error("Error retrieving audio blob " + error))
               }),
               map((audioBlob: Blob) => {
-                return this.addIndex(-1,new MusicAccessService(music, audioBlob))
+                return this.addIndex(-1,new MusicAccess(music, this.communicationService, audioBlob))
               })
             )
           )
@@ -147,32 +212,34 @@ export class ListMusicsService {
   }
 
   getMusicAttribute(path:string):Observable<MusicAttribute[]>{
-    const params = new HttpParams().set('filePath',path);
-    const headers = new HttpHeaders().set('Accept','application/json');
+    const params = new HttpParams().set('filePath',path)
+    const headers = new HttpHeaders().set('Accept','application/json')
     return this.http.get<MusicAttribute[]>(this.apiUrl+"/upload", {params, headers})
   }
 
   getAudio(index:number):Observable<Blob>{
     return this.http.get(this.apiUrl+"/"+index,{responseType:'blob'})
   }
-/*
-http://localhost:8080/audio/upload?filePath=C:/Users/rpeyremorte/Documents/Projet inter-contrat/Trieur de musique/InterContrat-MusicSort/FrontEnd/src/assets/01 One more time.mp3
-*/
-  addIndex(index: number, element: MusicAccessService): number{
-    if (index != -1 && index<this._musicList.length) {
-      this._musicList.splice(index,0,element)
-      return index
 
+  addIndex(index: number, element: MusicAccess): number{
+    if (index != -1 && index<this._musicList.length) {
+      this.musicList.splice(index,0,element)
+      this.updateMusicListIndexes()
+      return index
     }
     else {
-      this._musicList.push(element)
+      
+      this.musicList.push(element)
+      this.updateMusicListIndexes()
       return this._musicList.length-1
     } 
   }
-  removeIndex(index: number): MusicAccessService | undefined {
+  removeIndex(index: number): MusicAccess | undefined {
     if (index != -1 && index<this._musicList.length){
-      const removed = this._musicList[index]
-      this._musicList.splice(index,1);
+      const removed = this.musicList[index]
+      this.musicList.splice(index,1)
+      removed.index = -1
+      this.updateMusicListIndexes()
       return removed;      
     }
     else {
@@ -184,6 +251,8 @@ http://localhost:8080/audio/upload?filePath=C:/Users/rpeyremorte/Documents/Proje
   upperMoveIndex(index: number): boolean{
     if(index != 0 && index<this._musicList.length){
       [this._musicList[index],this._musicList[index-1]]= [this._musicList[index-1],this._musicList[index]]
+      this._musicList[index].index = index
+      this._musicList[index-1].index = index-1
       return true
     }
     else {
@@ -193,6 +262,8 @@ http://localhost:8080/audio/upload?filePath=C:/Users/rpeyremorte/Documents/Proje
   downMoveIndex(index: number): boolean{
     if(index != -1 && index<this._musicList.length-1){
       [this._musicList[index],this._musicList[index+1]]= [this._musicList[index+1],this._musicList[index]]
+      this._musicList[index].index = index
+      this._musicList[index+1].index = index+1
       return true
     }
     else {
@@ -200,21 +271,117 @@ http://localhost:8080/audio/upload?filePath=C:/Users/rpeyremorte/Documents/Proje
     }
   }
   saveWork(){
-    alert("Receive poke to save locally the work")
+    this.clearLocalStorage()
+    this.saveListsToLocalStorage()
   }
 
   saveFiles(path: string){
-    const new_path: string = path.replaceAll("//","/")
-    alert("Receive "+new_path+" to save/copy the files there")
+    const musics:MusicAttribute[] = this._musicList.map((music) => music.musicAttribute)
+    this.saveMusicAttribute(path,musics).subscribe(response => {
+    },
+    error => {
+      alert('Error when saving files')
+      console.error('Error when saving files:', error)
+    })
+  }
+  saveMusicAttribute(path:string,musics:MusicAttribute[]): Observable<String>{
+    const params = new HttpParams().set('savePath',path)
+    const headers = new HttpHeaders().set('Accept','application/json')
+    return this.http.post<String>(this.apiUrl+"/save", musics, {params, headers})
   }
 
   downloadFiles(name: string){
-    alert("Receive the name "+name+" for the zip folder of all musics")
+    const musics:MusicAttribute[] = this._musicList.map((music) => music.musicAttribute)
+    this.downloadZip(name,musics).subscribe(response => {
+      const blob = new Blob([response], { type: 'application/zip' });
+      const url:string = window.URL.createObjectURL(blob)
+      const a:any = document.createElement("a")
+      a.style = 'display:none'
+      a.href = url
+      a.download = name.substring(-4) == ".zip" ? name : name+".zip"
+      if (!document.body.contains(a)) {
+        document.body.appendChild(a);
+      }
+      a.click()
+      window.URL.revokeObjectURL(url);
+    }, error => {
+      alert("Error when downloading zip")
+      console.log("Error when downloading zip: "+error.type)
+    })
   }
 
-  resumeList():MusicAttribute[]{
-    return this._musicList.map((element) =>
-      element.musicAttribute
+  downloadZip(fileName: string, musics:MusicAttribute[] ): Observable<Blob>{
+    const params = new HttpParams().set('nameZip',fileName)
+    const headers = new HttpHeaders().set('Accept','application/zip')
+    return this.http.post(this.apiUrl+"/download",musics,{ responseType: 'blob' ,params})
+  }
+
+  resumeList(list:MusicAccess[]):MusicAttribute[]{
+    return list.map((element) => {      
+      var musicAttribute:MusicAttribute = element.musicAttribute
+      musicAttribute.accessPath = ""
+      return musicAttribute
+    })
+  }
+
+  saveListsToLocalStorage():void {
+    localStorage.setItem("keepList",JSON.stringify(this.resumeList(this._musicList)))
+    localStorage.setItem("retiredList",JSON.stringify(this.resumeList(this._musicListRetired)))
+  }
+
+  getListFromLocalStorage(key:string):MusicAttribute[]{
+    const list = localStorage.getItem(key)
+    return list ? JSON.parse(list) : []
+  }
+
+  clearLocalStorage():void{
+    localStorage.clear()
+  }
+
+  initFromLocalStorage(){   
+    this.getListFromLocalStorage("keepList").map(music => {
+      this.checkAndAdd(music).subscribe(response => {
+      },
+      error => {
+        console.log("Failed: ",error)
+      })
+    })
+    this.getListFromLocalStorage("retiredList").map(music => {
+      this.checkAndAdd(music).subscribe(response => {
+      },
+      error => {
+        console.log("Failed: ",error)
+      })
+    })
+    
+
+  }
+  checkAndAdd(music:MusicAttribute):Observable<void>{
+    return this.checkExist(music).pipe(      
+      mergeMap((response) => {
+        if (response.success){
+          return this.getAudio(music.id).pipe(
+            catchError((error) => {
+              return throwError(() => new Error("Error retrieving audio blob " + error))
+            }),
+            map((audioBlob: Blob) => {
+              this.addIndex(-1,new MusicAccess(music, this.communicationService, audioBlob))
+            })
+          )
+        } else {
+          return throwError(() => new Error("Error when checking "+music.fileName+" because of response: "+response))
+        }
+      }),
+      catchError((error) => {        
+        return throwError(() => new Error("Error when checking "+music.fileName+" from first pipe: "+error+"/"+JSON.stringify(error)))
+      })
     )
   }
+
+  checkExist(music: MusicAttribute): Observable<any>{
+    return this.http.post<String>(this.apiUrl+"/check", music)
+  }
+
+
+
 }

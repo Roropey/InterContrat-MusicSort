@@ -1,5 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { MusicAccessService } from '../../../services/music-access.service';
+import { MusicAccess } from '../../../models/music-access';
+import { CommunicationService } from '../../../services/communication.service';
 
 @Component({
   selector: 'app-music-reader',
@@ -9,11 +10,11 @@ import { MusicAccessService } from '../../../services/music-access.service';
 export class MusicReaderComponent implements OnInit {
 
     @Input()
-    music:MusicAccessService = new MusicAccessService(undefined)
+    music:MusicAccess = new MusicAccess(undefined)
     @Input()
     set toPause(toPause:boolean){
       if(toPause){
-        this.pauseAudio()
+        this.pause()
       }
     }
     
@@ -38,17 +39,17 @@ export class MusicReaderComponent implements OnInit {
 
     ngOnInit(){
     }
-    playAudio() {
-      this.music.playAudio();
-      this.playTriggered.emit();
+    play() {
+      this.music.playAudio()
+      this.playTriggered.emit()
     }
   
-    pauseAudio() {
-      this.music.pauseAudio();
+    pause() {
+      this.music.pauseAudio()
     }
 
-    stopAudio() {
-      this.music.stopAudio();
+    stop() {
+      this.music.stopAudio()
     }
   
   }

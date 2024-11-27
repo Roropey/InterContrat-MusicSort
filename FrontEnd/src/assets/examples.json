@@ -2,6 +2,7 @@
     {
         "id": 0,
         "accessPath": "./assets/Imagine Dragons - Radioactive.mp3",
+        "fileName": "Imagine Dragons - Radioactive",
         "title": "Radioactive",
         "artist": "Imagine Dragons",
         "album": "Radioactive",
@@ -14,6 +15,7 @@
     {
         "id": 1,
         "accessPath": "./assets/01 One more time.mp3",
+        "fileName": "01 One more time",
         "title": "One more time",
         "artist": "Daft Punk",
         "album": "Discovery",
@@ -26,6 +28,7 @@
     {
         "id": 2,
         "accessPath": "./assets/04 Harder, better, faster, stronger.mp3",
+        "fileName": "04 Harder, better, faster, stronger",
         "title": "Harder, better, faster, stronger",
         "artist": "Daft Punk",
         "album": "Discovery",
@@ -38,6 +41,7 @@
     {
         "id": 1,
         "accessPath": "./assets/01 One more time.mp3",
+        "fileName": "01 One more time",
         "title": "One more time",
         "artist": "Daft Punk",
         "album": "Discovery",

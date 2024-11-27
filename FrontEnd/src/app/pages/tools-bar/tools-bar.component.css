@@ -7,7 +7,7 @@
 }
 
 .right-tool-container{    
-    width: 40%;
+    width: 50%;
 }
 
 .search-bar{
@@ -34,23 +34,21 @@
 }
 
 .left-tool-container{
-    width: 35%;
-    justify-content: space-between;
+    display:flex;
+    width: 45%;
+    justify-content: end;
 }
+
 
 .volume-container {
     overflow-y: hidden;
-    width: 80%;
     align-self: center;
+    padding:0px 2vw;
     justify-content: center;
 }
 
-.volume-icon{
-    margin-bottom:-12px;
-}
-
 .volume-range{
-    width: 50%;    
+    width: 75%;    
     align-self: center;
     margin: 0px 0px -3px 20px;
     background: var(--light-blue);

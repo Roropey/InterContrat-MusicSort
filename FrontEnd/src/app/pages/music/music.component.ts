@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { MusicAccessService } from '../../services/music-access.service';
+import { MusicAccess } from '../../models/music-access';
+import { CommunicationService } from '../../services/communication.service';
 
 
 @Component({
@@ -13,9 +14,7 @@ export class MusicComponent {
   @Input()
   maxIndex: number = -1;
   @Input()
-  music: MusicAccessService = new MusicAccessService(undefined)
-  @Input()
-  toPause:boolean = false;
+  music: MusicAccess = new MusicAccess(undefined)
 
   popoverOpened: boolean = false;
   countOutside: number = 0;
@@ -25,8 +24,6 @@ export class MusicComponent {
   upperTriggered: EventEmitter<number> = new EventEmitter<number>();
   @Output()
   downTriggered: EventEmitter<number> = new EventEmitter<number>();
-  @Output()
-  playTriggered: EventEmitter<number> = new EventEmitter<number>();
 
 
   countPlusOutside(param:any){
@@ -54,11 +51,6 @@ export class MusicComponent {
 
   closePopover() {
     this.popoverOpened = false
-  }
-
-  playEmit(){
-    this.toPause = false;
-    this.playTriggered.emit(this.index);
   }
 
 }

@@ -23,6 +23,8 @@ import { heroChevronDownSolid,
    heroStopSolid
   } from '@ng-icons/heroicons/solid';
 import { heroInformationCircle, heroDocumentPlus, heroFolderArrowDown } from '@ng-icons/heroicons/outline';
+
+import { bootstrapTextWrap, bootstrapIndent, bootstrapRepeat } from '@ng-icons/bootstrap-icons';
 import { PopoverModule } from '@ngx-popovers/popover';
 import { PopoverConfigProvider } from './config/popover.config';
 import { NgxTooltip } from '@ngx-popovers/tooltip';
@@ -70,7 +72,10 @@ import { SaveBarComponent } from './pages/save-bar/save-bar.component';
       heroStopSolid,
       heroInformationCircle,
       heroDocumentPlus, 
-      heroFolderArrowDown
+      heroFolderArrowDown,
+      bootstrapTextWrap,
+      bootstrapIndent,
+      bootstrapRepeat
     }),
     PopoverModule,
     NgxTooltip

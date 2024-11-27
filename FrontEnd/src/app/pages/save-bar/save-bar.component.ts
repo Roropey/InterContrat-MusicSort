@@ -28,7 +28,7 @@ export class SaveBarComponent {
   }
 
   saveLocaly(){
-    alert("Normally save locally work, ready for the user to close the page to found it ready... but not implemented yet")
+    this.saveWorkTriggered.emit()
   }
 
   saveFiles(){

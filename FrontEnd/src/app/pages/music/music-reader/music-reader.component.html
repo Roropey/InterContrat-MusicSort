@@ -1,13 +1,13 @@
 <div class="audio-controls column-display">
-  <input *ngIf="isFinite" type="range" class="music-progression-bar" min="0" step="0.001" max="1"  [(ngModel)]="currentTime"/>
+  <input type="range" class="music-progression-bar" min="0" step="0.001" max="1"  [(ngModel)]="currentTime"/>
   <div class="row-display">
-    <button class="dark-blue-icon icon-button"(click)="playAudio()">
+    <button class="dark-blue-icon icon-button"(click)="play()">
       <ng-icon name="heroPlaySolid" color="var(--color-d-blue)" size=40/>
     </button>
-    <button class="dark-blue-icon icon-button" (click)="pauseAudio()">
+    <button class="dark-blue-icon icon-button" (click)="pause()">
       <ng-icon name="heroPauseSolid" color="var(--color-d-blue)" size=40/>
     </button>
-    <button class="dark-blue-icon icon-button" (click)="stopAudio()">
+    <button class="dark-blue-icon icon-button" (click)="stop()">
       <ng-icon name="heroStopSolid" color="var(--color-d-blue)" size=40/>
     </button>
   

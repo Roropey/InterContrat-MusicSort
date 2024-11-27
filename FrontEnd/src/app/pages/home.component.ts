@@ -6,7 +6,9 @@ import { Action } from "../enumerations/action.enum";
 import { MusicAttribute } from '../interfaces/music-attributes-given';
 import { Pile } from '../models/pile';
 import { ActionComp } from '../interfaces/action-comp';
-import { MusicAccessService } from '../services/music-access.service';
+import { MusicAccess } from '../models/music-access';
+import { CommunicationService } from '../services/communication.service';
+import { PlayStrat } from '../enumerations/play-strat';
 
 @Component({
   selector: 'app-home',
@@ -17,21 +19,20 @@ export class HomeComponent implements OnInit{
 
 
   undoActions: Pile<ActionComp> = new Pile<ActionComp>(50);
-  redoActions: Pile<ActionComp> = new Pile<ActionComp>(50);
-  
-  currentPlayingIndex:number = -1;
-  
+  redoActions: Pile<ActionComp> = new Pile<ActionComp>(50);  
 
   constructor(private dataService: DataService, private musicListService: ListMusicsService) { }
 
   
 
   ngOnInit(): void {
+    /*
     this.dataService.getData().subscribe((data) => {
-      this.musicListService.musicList = data
+      this.musicListService.musicList = data.map((element) => new MusicAccess(element))
     }, error => {
       console.error('Error when taking data with data service:', error)
-    });
+    });*/
+    this.musicListService.initFromLocalStorage()
   }
 
 
@@ -53,19 +54,23 @@ export class HomeComponent implements OnInit{
   }
 
   get musicListLength():number{
-    return this.musicListService.length;
+    return this.musicListService.length
   }
 
-  get musicList():MusicAccessService[]{
-    return this.musicListService.musicList;
+  get musicList():MusicAccess[]{
+    return this.musicListService.musicList
+  }
+
+  get playStrat():PlayStrat{
+    return this.musicListService.playStrat
   }
 
   get order():OrderStatus{
-    return this.musicListService.order;
+    return this.musicListService.order
   }
 
   get attributeOrder():Attribute{
-    return this.musicListService.attributeOrder;
+    return this.musicListService.attributeOrder
   }
 
   addMusics(path:string){
@@ -74,15 +79,18 @@ export class HomeComponent implements OnInit{
       this.undoActions.push(
         {
           toDo: Action.Remove,
-          musics: [new MusicAccessService(undefined)],
+          musics: [new MusicAccess(undefined)],
           indexes: indexes.sort((a,b)=> (a<=b ? 1 : -1))
         }
       )
       console.log(this.undoAction.length)
+    },
+    error => {
+      alert("Received error: "+error)
     })
   }
 
-  addIndex(indexes: number[], elements: MusicAccessService[]){
+  addIndex(indexes: number[], elements: MusicAccess[]){
     const indexReturned:number[] = elements.map(
       (element,index)=>
       this.musicListService.addIndex(indexes[index], element)
@@ -97,7 +105,7 @@ export class HomeComponent implements OnInit{
   }
   
   removeIndex(indexes: number[]) {
-    var elementsReturned: MusicAccessService[] = []
+    var elementsReturned: MusicAccess[] = []
     var indexesPass: number[] = []
     for (let index of indexes){
       const elementReturned = this.musicListService.removeIndex(index)
@@ -131,7 +139,7 @@ export class HomeComponent implements OnInit{
       this.undoActions.push(
         {
           toDo: Action.MoveDown,
-          musics: [new MusicAccessService(undefined)],
+          musics: [new MusicAccess(undefined)],
           indexes: [index - 1]
         }
       )
@@ -143,15 +151,11 @@ export class HomeComponent implements OnInit{
       this.undoActions.push(
         {
           toDo: Action.MoveUp,
-          musics: [new MusicAccessService(undefined)],
+          musics: [new MusicAccess(undefined)],
           indexes: [index + 1]
         }
       )
     }
-  }
-
-  playEmit(index:number){
-    this.currentPlayingIndex = index
   }
 
   undoAction(){
@@ -203,6 +207,10 @@ export class HomeComponent implements OnInit{
           break
       }
     }
+  }
+
+  changePlayState(){
+    this.musicListService.changePlayStrat()
   }
 
   saveWork(){

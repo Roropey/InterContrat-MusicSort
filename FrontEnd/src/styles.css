@@ -215,7 +215,6 @@ button {
     justify-content: space-around;
     top: 20vh;
     border: 3px;
-    padding: 2vw;
     cursor: default;
 
   }
@@ -229,6 +228,7 @@ button {
     z-index: 400;
     text-align: center;
     position: fixed;
+    padding: 2vw;
     
     align-items: center;
   }
@@ -245,7 +245,7 @@ button {
   }
   .path-bar{
     height: 5vh;    
-    width: 20vw;
+    width: 25vw;
     border-radius: 10px;
     outline: none;
     display: flex;
