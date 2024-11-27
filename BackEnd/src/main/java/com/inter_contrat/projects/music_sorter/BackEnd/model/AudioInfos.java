@@ -5,20 +5,22 @@ import jakarta.persistence.*;
 
 import java.sql.Blob;
 import java.util.Date;
+import java.util.Objects;
 
 @Entity
-public class AudioFile {
+public class AudioInfos {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(unique = true)
     private String path;
-
+    private String fileName;
     private String title;
     private String artist;
     private String album;
-    private Blob image;
+    @Lob
+    private byte[] image;
     private Integer yearRelease;
     private Integer number;
     private String genre;
@@ -35,6 +37,14 @@ public class AudioFile {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     public String getTitle() {
@@ -76,11 +86,11 @@ public class AudioFile {
         this.album = album;
     }
 
-    public Blob getImage() {
+    public byte[] getImage() {
         return image;
     }
 
-    public void setImage(Blob image) {
+    public void setImage(byte[] image) {
         this.image = image;
     }
 
@@ -109,7 +119,15 @@ public class AudioFile {
     }
 
     public MusicAttribute getMusicAttribute() {
-        return new MusicAttribute(this.id, "", this.title, this.artist, this.album, null, this.yearRelease, this.number, this.genre);
+        return new MusicAttribute(this.id, "", this.fileName, this.title, this.artist, this.album, this.image, this.yearRelease, this.number, this.genre);
     }
 
+    public boolean equalsMetadata(MusicAttribute musicAttribute) {
+        return (this.title!=null && this.title.equals(musicAttribute.getTitle()))
+                &&(this.artist!=null && this.artist.equals(musicAttribute.getArtist()))
+                &&(this.album!=null && this.album.equals(musicAttribute.getAlbum()))
+                &&(this.yearRelease!=null && this.yearRelease.equals(musicAttribute.getYearRelease()))
+                &&(this.number!=null && this.number.equals(musicAttribute.getNumber()))
+                &&(this.genre!=null && this.genre.equals(musicAttribute.getGenre()));
+    }
 }

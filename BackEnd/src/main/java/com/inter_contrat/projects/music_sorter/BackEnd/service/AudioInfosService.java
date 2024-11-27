@@ -1,16 +1,32 @@
 package com.inter_contrat.projects.music_sorter.BackEnd.service;
 import com.inter_contrat.projects.music_sorter.BackEnd.model.AudioInfos;
-import com.inter_contrat.projects.music_sorter.BackEnd.repository.AudioFileRepository;
+import com.inter_contrat.projects.music_sorter.BackEnd.repository.AudioInfosRepository;
 import com.inter_contrat.projects.music_sorter.BackEnd.model.MusicAttribute;
-import org.apache.tika.parser.audio.AudioParser;
+
+import org.jaudiotagger.audio.flac.FlacFileReader;
+import org.jaudiotagger.audio.flac.metadatablock.MetadataBlockDataPicture;
+import org.jaudiotagger.audio.mp3.MP3File;
+import org.jaudiotagger.audio.mp3.MP3FileReader;
+import org.jaudiotagger.audio.wav.WavFileReader;
+
+import org.jaudiotagger.tag.flac.FlacTag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import org.apache.commons.io.FilenameUtils;
 
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.sax.BodyContentHandler;
 import org.apache.tika.parser.mp3.Mp3Parser;
+
+import org.jaudiotagger.audio.AudioHeader;
+import org.jaudiotagger.tag.FieldKey;
+import org.jaudiotagger.tag.Tag;
+import org.jaudiotagger.tag.TagField;
+import org.jaudiotagger.audio.AudioFileIO;
+import org.jaudiotagger.audio.AudioFile;
 
 
 import java.io.*;
@@ -20,6 +36,8 @@ import java.nio.file.*;
 
 import jakarta.transaction.Transactional;
 
+import javax.sql.rowset.serial.SerialBlob;
+import java.sql.Blob;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -27,10 +45,10 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 @Service
-public class AudioFileService {
+public class AudioInfosService {
 
     @Autowired
-    private AudioFileRepository audioFileRepository;
+    private AudioInfosRepository audioInfosRepository;
 
     private List<Path> findAllFiles(String directoryPath) throws IOException {
         List<Path> fileList = new ArrayList<>();
@@ -48,52 +66,100 @@ public class AudioFileService {
         return fileList;
     }
 
-    private Map<String,String> getAttributes(File file) {
-        Map<String,String> attributes = new HashMap<>();
-        // Extraire les métadonnées du fichier audio
-        BodyContentHandler handler = new BodyContentHandler();
-        Metadata metadata = new Metadata();
-        ParseContext context = new ParseContext();
-        Parser parser = file.getAbsolutePath().endsWith("mp3") ?
-                new Mp3Parser() : new AudioParser();
-        try (FileInputStream inputStream = new FileInputStream(file)) {
-            parser.parse(inputStream, handler, metadata, context);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        if (metadata.get("X-TIKA:EXCEPTION:warn")==null){
+    private Map<String,Object> getAttributes(File file) {
+        Map<String,Object> attributes = new HashMap<>();
+        try {
+            System.out.println("Name: "+file.getName());
+            String ext = FilenameUtils.getExtension(file.getAbsolutePath());
+            attributes.put("fileName",file.getName().substring(0,file.getName().length()-ext.length()-1));
+            AudioFile audioFile = null;
+            byte[] image = new byte[0];
+            switch (ext) {
+                case "mp3":
+                    System.out.println("mp3");
+                    audioFile = new MP3FileReader().read(file);
+                    Tag tag = audioFile.getTag();
+                    attributes.put("image", tag.getFirstArtwork().getBinaryData());
+                    System.out.println("desc: "+tag.getFirstArtwork().getDescription());
+                    System.out.println("imgUrl: "+tag.getFirstArtwork().getImageUrl());
+                    System.out.println("MimeType: "+tag.getFirstArtwork().getMimeType());
+                    System.out.println("pictType: "+tag.getFirstArtwork().getPictureType());
+                    break;
+                case "flac":
+                    System.out.println("flac");
+                    audioFile = new FlacFileReader().read(file);
+                    FlacTag tagFlac = (FlacTag) audioFile.getTag();
+                    List<MetadataBlockDataPicture> images= tagFlac.getImages();
+                    if (!images.isEmpty()) {
+                        attributes.put("image",tagFlac.getImages().getFirst().getImageData());
+                    }
+                    break;
+                case "wav":
+                    //audioFile = new WavFileReader().read(file);
+                    attributes.put("title",file.getName());
+                    System.out.println(attributes);
+                    return attributes;
+                default:
+                    attributes.put("error", "true");
+                    return attributes;
+            }
+
+            Tag tag = audioFile.getTag();
+            System.out.println(tag);
+            System.out.println(tag.getClass().getSimpleName());
+            attributes.put("title", tag.getFirst(FieldKey.TITLE)==null ? file.getName() : tag.getFirst(FieldKey.TITLE));
+            attributes.put("artist",tag.getFirst(FieldKey.ARTIST));
+            attributes.put("album",tag.getFirst(FieldKey.ALBUM));
+            attributes.put("yearRelease",tag.getFirst(FieldKey.YEAR));
+            attributes.put("number",tag.getFirst(FieldKey.TRACK));
+            attributes.put("genre",tag.getFirst(FieldKey.GENRE));
+            System.out.println(Arrays.toString(image));
+            //attributes.put("image",tag.getFirst(FieldKey.COVER_ART));
+            /*
+            AudioFile f = AudioFileIO.read(file);
+            Tag tag = f.getTag();
+            AudioHeader AudioHeader = f.getAudioHeader();
             String[] tmpPath = file.getAbsolutePath().split(Pattern.quote(File.separator));
-            attributes.put("title", metadata.get("dc:title")==null ? tmpPath[tmpPath.length-1] : metadata.get("dc:title"));
-            attributes.put("artist", metadata.get("xmpDM:artist"));
-            attributes.put("album", metadata.get("xmpDM:album"));
-            attributes.put("yearRelease", metadata.get("xmpDM:releaseDate"));
-            attributes.put("number", metadata.get("xmpDM:trackNumber"));
-            attributes.put("genre", metadata.get("xmpDM:genre"));
-            attributes.put("image", metadata.get("xmpDM:albumArtURI"));        }
-        else {
+
+            System.out.println("MEDIA: "+tag.getFirst(FieldKey.MEDIA));
+            System.out.println("ENCODER: "+tag.getFirst(FieldKey.ENCODER));
+
+             */
+        } catch (Exception e) {
+            System.out.println("Error with "+file.getName()+": "+e.getMessage());
             attributes.put("error", "true");
         }
-
         System.out.println(attributes);
         return attributes;
     }
 
+
     public Optional<MusicAttribute> saveAudioFileFromFile(File file) {
-        Map<String,String> attributes = getAttributes(file);
+        Map<String,Object> attributes = getAttributes(file);
         if (attributes.containsKey("error")) {
             return Optional.empty();
         }
         else {
             AudioInfos audioInfos = new AudioInfos();
-            audioInfos.setTitle(attributes.get("title"));
-            audioInfos.setArtist(attributes.get("artist"));
+            audioInfos.setFileName((String) attributes.get("fileName"));
+            audioInfos.setTitle((String) attributes.get("title"));
+            audioInfos.setArtist((String) attributes.get("artist"));
             audioInfos.setPath(file.getAbsolutePath());
-            audioInfos.setAlbum(attributes.get("album"));
-            audioInfos.setYearRelease(attributes.get("yearRelease") == null ? -1 : Integer.parseInt(attributes.get("yearRelease")));
-            audioInfos.setNumber(attributes.get("number") == null ? -1 : Integer.parseInt(attributes.get("number")));
-            audioInfos.setGenre(attributes.get("genre"));
-            audioInfos.setCreatedAt(new java.util.Date());
-            audioFileRepository.save(audioInfos);
+            audioInfos.setAlbum((String) attributes.get("album"));
+            audioInfos.setYearRelease(attributes.get("yearRelease") == null ? -1 : Integer.parseInt((String) attributes.get("yearRelease")));
+            audioInfos.setNumber(attributes.get("number") == null ? -1 : Integer.parseInt((String) attributes.get("number")));
+            audioInfos.setGenre((String) attributes.get("genre"));
+            try {
+                if (attributes.containsKey("image") && attributes.get("image") != null) {
+
+                    audioInfos.setImage((byte[]) attributes.get("image"));
+                }
+            } catch (Exception e) {
+                System.out.println("Failed to get image to blob: "+e.getMessage());
+            }
+            audioInfos.setCreatedAt(new Date());
+            System.out.println(audioInfos.toString());
+            audioInfosRepository.save(audioInfos);
             return Optional.ofNullable(audioInfos.getMusicAttribute());
         }
     }
@@ -120,25 +186,18 @@ public class AudioFileService {
         
     }
 
-    @Transactional
-    public void updateAudioMetadata(Long id, String title, String artist) {
-        AudioInfos audioInfos = audioFileRepository.findById(id).orElseThrow();
-        audioInfos.setTitle(title);
-        audioInfos.setArtist(artist);
-    }
-
     public MusicAttribute getAudioFileMetadata(Long id) {
-        AudioInfos audioInfos = audioFileRepository.findById(id).orElseThrow(() -> new RuntimeException("Audio file not found"));
+        AudioInfos audioInfos = audioInfosRepository.findById(id).orElseThrow(() -> new RuntimeException("Audio file not found"));
         return audioInfos.getMusicAttribute();
     }
 
     public File getAudioFile(Long id) {
-        AudioInfos audioInfos = audioFileRepository.findById(id).orElseThrow(() -> new RuntimeException("Audio file not found"));
+        AudioInfos audioInfos = audioInfosRepository.findById(id).orElseThrow(() -> new RuntimeException("Audio file not found"));
         return new File(audioInfos.getPath());
     }
 
     public Optional<AudioInfos> findByPath(String path) {
-        return audioFileRepository.findByPath(path);
+        return audioInfosRepository.findByPath(path);
     }
 
     public void saveRepositorySelection(String directoryStringPath, List<MusicAttribute> musicAttributes) {
@@ -154,26 +213,61 @@ public class AudioFileService {
     }
 
     private void copyFile(Path directory, MusicAttribute musicAttribute) {
-        AudioInfos audioInfos = audioFileRepository.findById(musicAttribute.getId()).orElseThrow(() -> new RuntimeException("Audio file not found"));
-        String[] tmpPath = audioInfos.getPath().split(Pattern.quote(File.separator));
+        AudioInfos audioInfos = getAudioInfo(musicAttribute);
+        String ext = FilenameUtils.getExtension(audioInfos.getPath());
+        Path goal = Path.of(directory +"/"+ musicAttribute.getFileName()+"."+ext);
         try {
-            if (!Files.exists( Path.of(directory +"/"+ tmpPath[tmpPath.length - 1]))) {
-                Files.copy(Path.of(audioInfos.getPath()), Path.of(directory +"/"+ tmpPath[tmpPath.length - 1]));
+            if (!Files.exists(goal)) {
+                Files.copy(Path.of(audioInfos.getPath()), goal);
+            }
+            File newFile = new File(goal.toString());
+            if (!audioInfos.equalsMetadata(musicAttribute)){
+                writeAudioFile(musicAttribute, newFile);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
+    private void writeAudioFile(MusicAttribute musicAttribute, File file) {
+
+        try {
+            AudioFile audioFile = AudioFileIO.read(file);
+            Tag tag = audioFile.getTag();
+            tag.setField(FieldKey.TITLE,musicAttribute.getTitle());
+            tag.setField(FieldKey.ARTIST,musicAttribute.getArtist());
+            tag.setField(FieldKey.ALBUM,musicAttribute.getAlbum());
+            tag.setField(FieldKey.YEAR,musicAttribute.getYearRelease().toString());
+            tag.setField(FieldKey.TRACK,musicAttribute.getNumber().toString());
+            tag.setField(FieldKey.GENRE,musicAttribute.getGenre());
+            AudioFileIO.write(audioFile);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public byte[] createZipFile(List<MusicAttribute> musicsAttributes) throws IOException {
-        String[] files = musicsAttributes.stream().map(this::getPathAudio).toArray(String[]::new);
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream)) {
-            for (String filePath : files) {
+            for (MusicAttribute musicAttribute : musicsAttributes) {
+                AudioInfos audioInfos = getAudioInfo(musicAttribute);
+                String filePath = audioInfos.getPath();
+                String ext = FilenameUtils.getExtension(filePath);
                 File file = new File(filePath);
                 if (file.exists() && file.isFile()) {
-                    zipOutputStream.putNextEntry(new ZipEntry(file.getName()));
-                    Files.copy(file.toPath(), zipOutputStream);
+                    zipOutputStream.putNextEntry(new ZipEntry(musicAttribute.getFileName()+"."+ext));
+                    System.out.println(audioInfos.equalsMetadata(musicAttribute));
+                    if (audioInfos.equalsMetadata(musicAttribute)){
+                        Files.copy(file.toPath(), zipOutputStream);
+                    } else {
+                        String tmpPath = file.getParent()+"/tmp."+ext;
+                        Files.copy(file.toPath(), Path.of(tmpPath));
+                        File tmp = new File(tmpPath);
+                        writeAudioFile(musicAttribute, tmp);
+                        Files.copy(tmp.toPath(), zipOutputStream);
+                        Files.deleteIfExists(tmp.toPath());
+                    }
+
                     /*
                     try (InputStream inputStream = Files.newInputStream(path)) {
                         IOUtils.copy(inputStream, zipOutputStream);
@@ -187,9 +281,8 @@ public class AudioFileService {
         return byteArrayOutputStream.toByteArray();
     }
 
-    private String getPathAudio(MusicAttribute musicAttribute) {
-        AudioInfos audioInfos = audioFileRepository.findById(musicAttribute.getId()).orElseThrow(() -> new RuntimeException("Audio file not found"));
-        return audioInfos.getPath();
+    public AudioInfos getAudioInfo(MusicAttribute musicAttribute) {
+        return audioInfosRepository.findById(musicAttribute.getId()).orElseThrow(() -> new RuntimeException("Audio file not found"));
     }
 }
 

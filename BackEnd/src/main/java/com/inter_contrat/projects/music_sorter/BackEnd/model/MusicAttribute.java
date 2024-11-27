@@ -5,17 +5,19 @@ import java.sql.Blob;
 public class MusicAttribute {
     private Long id;
     private String accessPath;
+    private String fileName;
     private String title;
     private String artist;
     private String album;
-    private Blob image;
+    private byte[] image;
     private Integer yearRelease;
     private Integer number;
     private String genre;
 
-    public MusicAttribute(Long id, String accessPath, String title, String artist, String album, Blob image, Integer yearRelease, Integer number, String genre) {
+    public MusicAttribute(Long id, String accessPath, String fileName, String title, String artist, String album, byte[] image, Integer yearRelease, Integer number, String genre) {
         this.id = id;
         this.accessPath = accessPath;
+        this.fileName = fileName;
         this.title = title;
         this.artist = artist;
         this.album = album;
@@ -29,6 +31,7 @@ public class MusicAttribute {
         return "MusicAttribute{" +
                 "id=" + id +
                 ", accessPath='" + accessPath + '\'' +
+                ", fileName='" + fileName + '\'' +
                 ", title='" + title + '\'' +
                 ", artist='" + artist + '\'' +
                 ", album='" + album + '\'' +
@@ -46,6 +49,11 @@ public class MusicAttribute {
         return accessPath;
     }
 
+
+    public String getFileName() {
+        return fileName;
+    }
+
     public String getTitle() {
         return title;
     }
@@ -58,7 +66,7 @@ public class MusicAttribute {
         return album;
     }
 
-    public Blob getImage() {
+    public byte[] getImage() {
         return image;
     }
 
