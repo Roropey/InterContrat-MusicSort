@@ -4,6 +4,7 @@ export interface MusicAttribute {
     id: number;
     accessPath: string;
     fileName: string;
+    extension: string;
     title: string;
     artist: string;
     album: string;

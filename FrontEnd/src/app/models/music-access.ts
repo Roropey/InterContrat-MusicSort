@@ -21,6 +21,7 @@ export class MusicAccess {
         id:-1,
         accessPath:"",
         fileName:"",
+        extension:"",
         title: "",
         artist: "",
         album: "",
@@ -82,6 +83,10 @@ export class MusicAccess {
 
   get fileName():string{
     return this._musicAttribute.fileName
+  }
+
+  get extension():string{
+    return this._musicAttribute.extension
   }
 
   set title(value:string){
@@ -152,6 +157,10 @@ export class MusicAccess {
     if (this.communicationService){      
       this.communicationService.sendSignal({action: PlayAction.End, index: this._index})
     }
+  }
+
+  sameFile(other:MusicAccess):boolean{
+    return (this._musicAttribute.fileName==other.fileName) && (this._musicAttribute.extension) == other.extension
   }
 
   playAudio() {

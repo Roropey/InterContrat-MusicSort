@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { DataService } from "../services/data.service";
 import { ListMusicsService } from '../services/list-musics.service';
 import { OrderStatus, Attribute } from '../enumerations/ordering.enum';
@@ -9,7 +9,7 @@ import { ActionComp } from '../interfaces/action-comp';
 import { MusicAccess } from '../models/music-access';
 import { CommunicationService } from '../services/communication.service';
 import { PlayStrat } from '../enumerations/play-strat';
-
+import { NgxSpinnerService } from "ngx-spinner";
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
@@ -21,18 +21,35 @@ export class HomeComponent implements OnInit{
   undoActions: Pile<ActionComp> = new Pile<ActionComp>(50);
   redoActions: Pile<ActionComp> = new Pile<ActionComp>(50);  
 
-  constructor(private dataService: DataService, private musicListService: ListMusicsService) { }
+  constructor(private dataService: DataService, private musicListService: ListMusicsService, private cdr: ChangeDetectorRef, private spinner: NgxSpinnerService
+  ) { }
 
   
 
   ngOnInit(): void {
+    
     /*
     this.dataService.getData().subscribe((data) => {
       this.musicListService.musicList = data.map((element) => new MusicAccess(element))
     }, error => {
       console.error('Error when taking data with data service:', error)
     });*/
-    this.musicListService.initFromLocalStorage()
+       
+    this.musicListService.getListFromLocalStorage("keepList").map(music => {
+      this.musicListService.checkAndAdd(music).subscribe(response => {
+        this.musicList = this.musicList.concat()
+      },
+      error => {
+        console.log("Failed: ",error)
+      })
+    })
+    this.musicListService.getListFromLocalStorage("retiredList").map(music => {
+      this.musicListService.checkAndAdd(music).subscribe(response => {},
+      error => {
+        console.log("Failed: ",error)
+      })
+    })
+    //this.musicListService.initFromLocalStorage()
   }
 
 
@@ -43,6 +60,7 @@ export class HomeComponent implements OnInit{
   ordering(wantedOrder: Attribute)
   {
     this.musicListService.attributeOrder = wantedOrder
+    this.musicList = this.musicList.concat()
   }
 
   modifVolume(value: number){
@@ -60,6 +78,9 @@ export class HomeComponent implements OnInit{
   get musicList():MusicAccess[]{
     return this.musicListService.musicList
   }
+  set musicList(list:MusicAccess[]){
+    this.musicListService.musicList = list
+  }
 
   get playStrat():PlayStrat{
     return this.musicListService.playStrat
@@ -73,6 +94,10 @@ export class HomeComponent implements OnInit{
     return this.musicListService.attributeOrder
   }
 
+  trackByFn(index: number, music: any): number {
+    return music.id;  // ou music.id si chaque élément a un identifiant unique
+  }
+
   addMusics(path:string){
     // Subscribe to add into actions after receiving the results
     this.musicListService.addMusics(path).subscribe((indexes) => {
@@ -83,7 +108,7 @@ export class HomeComponent implements OnInit{
           indexes: indexes.sort((a,b)=> (a<=b ? 1 : -1))
         }
       )
-      console.log(this.undoAction.length)
+      this.musicList = this.musicList.concat()
     },
     error => {
       alert("Received error: "+error)
@@ -102,6 +127,7 @@ export class HomeComponent implements OnInit{
         indexes: indexReturned
       }
     )
+    this.cdr.detectChanges()
   }
   
   removeIndex(indexes: number[]) {
@@ -131,6 +157,7 @@ export class HomeComponent implements OnInit{
         }
       )
     }
+    this.musicList = this.musicList.concat()
   }
 
   upperMoveIndex(index: number){
@@ -144,6 +171,7 @@ export class HomeComponent implements OnInit{
         }
       )
     }
+    this.musicList = this.musicList.concat()
   }
   downMoveIndex(index: number){
     const approval: boolean = this.musicListService.downMoveIndex(index)
@@ -156,6 +184,7 @@ export class HomeComponent implements OnInit{
         }
       )
     }
+    this.musicList = this.musicList.concat()
   }
 
   undoAction(){

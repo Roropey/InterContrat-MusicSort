@@ -1,8 +1,9 @@
-import { NgModule } from '@angular/core';
+import { importProvidersFrom, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { ScrollingModule } from "@angular/cdk/scrolling";
 
 import { NgIconsModule } from '@ng-icons/core';
 import { heroChevronDownSolid,
@@ -29,6 +30,8 @@ import { PopoverModule } from '@ngx-popovers/popover';
 import { PopoverConfigProvider } from './config/popover.config';
 import { NgxTooltip } from '@ngx-popovers/tooltip';
 
+import { NgxSpinnerModule } from "ngx-spinner";
+
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './pages/home.component';
@@ -36,7 +39,6 @@ import { ToolsBarComponent } from './pages/tools-bar/tools-bar.component';
 import { MusicComponent } from './pages/music/music.component';
 import { MusicReaderComponent } from './pages/music/music-reader/music-reader.component';
 import { SaveBarComponent } from './pages/save-bar/save-bar.component';
-
 
 @NgModule({
   declarations: [
@@ -78,9 +80,12 @@ import { SaveBarComponent } from './pages/save-bar/save-bar.component';
       bootstrapRepeat
     }),
     PopoverModule,
-    NgxTooltip
+    NgxTooltip,
+    ScrollingModule,
+    NgxSpinnerModule
   ],
-  providers: [PopoverConfigProvider],
+  providers: [PopoverConfigProvider
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

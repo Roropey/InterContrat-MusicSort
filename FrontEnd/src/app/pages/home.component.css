@@ -20,3 +20,16 @@
     background: var(--dark-blue);
     border-radius: 10px;
 }
+
+.viewport{
+    height: 100%;
+    width: 100%;    
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+
+ngx-spinner {
+    z-index: 9999 !important;  /* Assurez-vous qu'il est au-dessus des autres éléments */
+  }
+

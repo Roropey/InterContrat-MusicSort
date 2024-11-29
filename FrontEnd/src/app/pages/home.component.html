@@ -6,12 +6,24 @@
     (addTriggered)="addMusics($event)" (changeStratTriggered)="changePlayState()" (undoTriggered)="undoAction()" (redoTriggered)="redoAction()"/>
 
 
+    
     <div class="container-base container-boxe ">
       <div class="music-list-boxe">
-          <tr *ngFor="let music of musicList, let i = index">
+          <!--<tr *ngFor="let music of musicList, let i = index">
               <app-music [index]="i" [maxIndex]="musicListLength" [music]=music
               (deleteTriggered)="removeIndex($event)" (upperTriggered)="upperMoveIndex($event)" (downTriggered)="downMoveIndex($event)"/>
-          </tr>
+          </tr>-->
+          
+          <cdk-virtual-scroll-viewport itemSize="75" class="viewport">
+            <div *cdkVirtualFor="let music of musicList; let i = index; trackBy: trackByFn">
+                <app-music [index]="i" [maxIndex]="musicListLength" [music]="music"
+                    (deleteTriggered)="removeIndex($event)" 
+                    (upperTriggered)="upperMoveIndex($event)" 
+                    (downTriggered)="downMoveIndex($event)">
+                </app-music>
+            </div>
+        </cdk-virtual-scroll-viewport>
+        
       </div>
     </div>
     <app-save-bar (saveWorkTriggered)="saveWork()" (saveFilesTriggered)="saveFiles($event)" (downloadTriggered)="downloadFiles($event)"/>

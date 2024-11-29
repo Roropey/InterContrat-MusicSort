@@ -275,14 +275,38 @@ export class ListMusicsService {
     this.saveListsToLocalStorage()
   }
 
+  getMusicAttributes():MusicAttribute[]{
+    const doubleList:number[] = this._musicList.reduce((accumulator:number[],element:MusicAccess,id:number) => {
+        for (let i = id+1; i<this.length;i++) {
+          if (element.sameFile(this._musicList[i])) {
+            accumulator.push(id)
+          }
+        }
+        return accumulator
+      }, []
+    )
+    console.log(doubleList)
+    if (doubleList.length>0){
+      if(!confirm("Musics with same file name, would you like to continue ?\nIf yes, only the last music(s) with the same file name will be kept.")){
+        return []
+      }
+    }
+    const keepList:MusicAccess[] = this._musicList.filter((_element,index)=> {
+      return !doubleList.includes(index)
+    })   
+    return keepList.map((music:MusicAccess):MusicAttribute => music.musicAttribute)
+  }
+
   saveFiles(path: string){
-    const musics:MusicAttribute[] = this._musicList.map((music) => music.musicAttribute)
-    this.saveMusicAttribute(path,musics).subscribe(response => {
-    },
-    error => {
-      alert('Error when saving files')
-      console.error('Error when saving files:', error)
-    })
+    const musics:MusicAttribute[] = this.getMusicAttributes()
+    if (musics.length>0) {      
+      this.saveMusicAttribute(path,musics).subscribe(response => {
+      },
+      error => {
+        alert('Error when saving files')
+        console.error('Error when saving files:', error)
+      })
+    }
   }
   saveMusicAttribute(path:string,musics:MusicAttribute[]): Observable<String>{
     const params = new HttpParams().set('savePath',path)
@@ -291,23 +315,25 @@ export class ListMusicsService {
   }
 
   downloadFiles(name: string){
-    const musics:MusicAttribute[] = this._musicList.map((music) => music.musicAttribute)
-    this.downloadZip(name,musics).subscribe(response => {
-      const blob = new Blob([response], { type: 'application/zip' });
-      const url:string = window.URL.createObjectURL(blob)
-      const a:any = document.createElement("a")
-      a.style = 'display:none'
-      a.href = url
-      a.download = name.substring(-4) == ".zip" ? name : name+".zip"
-      if (!document.body.contains(a)) {
-        document.body.appendChild(a);
-      }
-      a.click()
-      window.URL.revokeObjectURL(url);
-    }, error => {
-      alert("Error when downloading zip")
-      console.log("Error when downloading zip: "+error.type)
-    })
+    const musics:MusicAttribute[] = this.getMusicAttributes()
+    if (musics.length>0) {
+      this.downloadZip(name,musics).subscribe(response => {
+        const blob = new Blob([response], { type: 'application/zip' });
+        const url:string = window.URL.createObjectURL(blob)
+        const a:any = document.createElement("a")
+        a.style = 'display:none'
+        a.href = url
+        a.download = name.substring(-4) == ".zip" ? name : name+".zip"
+        if (!document.body.contains(a)) {
+          document.body.appendChild(a);
+        }
+        a.click()
+        window.URL.revokeObjectURL(url);
+      }, error => {
+        alert("Error when downloading zip")
+        console.log("Error when downloading zip: "+error.type)
+      })
+    }
   }
 
   downloadZip(fileName: string, musics:MusicAttribute[] ): Observable<Blob>{
