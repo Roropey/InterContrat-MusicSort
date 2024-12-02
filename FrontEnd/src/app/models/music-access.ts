@@ -148,6 +148,10 @@ export class MusicAccess {
     return this._audioState.duration     
   }
 
+  get isPlaying():boolean {
+    return this._audioState.isPlaying
+  }
+
 
   private updateState(): void {
     this._audioState.currentTime = this._audio.currentTime
@@ -166,7 +170,6 @@ export class MusicAccess {
   playAudio() {
     this._audio.play()
     this._audioState.isPlaying = true
-    console.log("Send signal")
     if (this.communicationService){      
       this.communicationService.sendSignal({action: PlayAction.Play, index: this._index})
     }
@@ -174,13 +177,19 @@ export class MusicAccess {
 
   pauseAudio() {
     this._audio.pause()
-    this._audioState.isPlaying = false
+    this._audioState.isPlaying = false    
+    if (this.communicationService){      
+      this.communicationService.sendSignal({action: PlayAction.Pause, index: this._index})
+    }
   }
 
   stopAudio() {
     this._audio.pause()
     this._audio.currentTime = 0
-    this._audioState.isPlaying = false
+    this._audioState.isPlaying = false    
+    if (this.communicationService){      
+      this.communicationService.sendSignal({action: PlayAction.Stop, index: this._index})
+    }
   }
 
 }

@@ -116,14 +116,23 @@ export class ListMusicsService {
   }
 
   set currentPlayingIndex(value:number){
-    if (this._currentPlayingIndex >=0) {
+    /*
+    if (this._currentPlayingIndex >=0 && this._currentPlayingIndex != value) {
       this._musicList[this._currentPlayingIndex].pauseAudio()
+    }*/
+    if (this._currentPlayingIndex >=0 ) {
+      this._musicList.forEach((musicAccess,index)=>{if(value!=index){musicAccess.pauseAudio()}})
+      this._musicListRetired.forEach((musicAccess)=>musicAccess.pauseAudio())
     }
     this._currentPlayingIndex = value
   }
 
   get length(): number {
     return this._musicList.length
+  }
+
+  get totLength(): number {
+    return this._musicList.length + this._musicListRetired.length
   }
 
   interpretCom(comComp: ComComposition){
@@ -184,14 +193,22 @@ export class ListMusicsService {
   addMusics(path:string):Observable<number[]>{
     return this.getMusicAttribute(path).pipe(
       catchError((error) => {
-        return throwError(() => new Error("Error retrieving music attributes "+error))
+        return throwError(() => new Error("Error retrieving music attributes "+JSON.stringify(error)))
       }),
       switchMap((musics: MusicAttribute[]) => {
         if (musics) {
-          const audioRequests:Observable<number>[] = musics.map((music) =>
+          console.log(musics.length)
+          
+          const addingThreshold = 1000 - this.totLength
+          if (musics.length > addingThreshold) {
+            if (!confirm("Adding the musics found will make the number of musics exceed 1000, should continue or not ?\nIf continue, only the "+addingThreshold+" first musics found will be added.")){
+              return throwError (() => new Error("Exception : Not continuiing with more than 1000 musics"))
+            }
+          }
+          const audioRequests:Observable<number>[] = musics.slice(0,Math.min(addingThreshold,musics.length)).map((music) =>
             this.getAudio(music.id).pipe(
               catchError((error) => {
-                return throwError(() => new Error("Error retrieving audio blob " + error))
+                return throwError(() => new Error("Error retrieving audio blob " + JSON.stringify(error)))
               }),
               map((audioBlob: Blob) => {
                 return this.addIndex(-1,new MusicAccess(music, this.communicationService, audioBlob))
@@ -214,6 +231,7 @@ export class ListMusicsService {
   getMusicAttribute(path:string):Observable<MusicAttribute[]>{
     const params = new HttpParams().set('filePath',path)
     const headers = new HttpHeaders().set('Accept','application/json')
+    headers.set('timeout','${2000000}')
     return this.http.get<MusicAttribute[]>(this.apiUrl+"/upload", {params, headers})
   }
 
@@ -351,8 +369,13 @@ export class ListMusicsService {
   }
 
   saveListsToLocalStorage():void {
-    localStorage.setItem("keepList",JSON.stringify(this.resumeList(this._musicList)))
-    localStorage.setItem("retiredList",JSON.stringify(this.resumeList(this._musicListRetired)))
+    try {
+      
+      localStorage.setItem("keepList",JSON.stringify(this.resumeList(this._musicList)))
+      localStorage.setItem("retiredList",JSON.stringify(this.resumeList(this._musicListRetired)))
+    } catch (error){
+      alert("Unable to save session locally, maybe the size of your music list is to big.")
+    }
   }
 
   getListFromLocalStorage(key:string):MusicAttribute[]{

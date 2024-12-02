@@ -27,6 +27,11 @@
       </div>
     </div>
     <app-save-bar (saveWorkTriggered)="saveWork()" (saveFilesTriggered)="saveFiles($event)" (downloadTriggered)="downloadFiles($event)"/>
-    
     <p>Affiché : {{musicListLength}}, order : {{order}}, volume : {{volume}}, size undo : {{undoActions.length()}}, size redo : {{redoActions.length()}}</p>
 </div>
+<div *ngIf="adding" class="adding-container">
+    <div class="adding-window">
+        <p>Adding musics in process</p>
+    </div>
+</div>
+<app-loading-indicator />

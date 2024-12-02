@@ -7,9 +7,11 @@ export const PopoverConfigProvider: Provider = {
   useValue: new NgxPopoverConfig({
     arrow: true,
     closeOnClickedOutside: true,
-    middleware: [autoPlacement(),
+    middleware: [autoPlacement({
+      allowedPlacements:['left-start','left','left-end']
+    }),
         offset(4),
-        hide()
+        hide(),
       ]
   })
 };

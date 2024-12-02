@@ -11,16 +11,6 @@ export class MusicReaderComponent implements OnInit {
 
     @Input()
     music:MusicAccess = new MusicAccess(undefined)
-    @Input()
-    set toPause(toPause:boolean){
-      if(toPause){
-        this.pause()
-      }
-    }
-    
-
-    @Output()
-    playTriggered: EventEmitter<void> = new EventEmitter<void>();
 
     get currentTime(){
       return this.music.currentTime
@@ -33,6 +23,10 @@ export class MusicReaderComponent implements OnInit {
       return Number.isFinite(this.duration)
     }
 
+    get isPlaying():boolean{
+      return this.music.isPlaying
+    }
+
     set currentTime(value: number){
       this.music.currentTime = value
     }
@@ -41,7 +35,6 @@ export class MusicReaderComponent implements OnInit {
     }
     play() {
       this.music.playAudio()
-      this.playTriggered.emit()
     }
   
     pause() {

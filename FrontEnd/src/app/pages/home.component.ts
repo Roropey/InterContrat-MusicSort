@@ -1,15 +1,13 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { DataService } from "../services/data.service";
 import { ListMusicsService } from '../services/list-musics.service';
 import { OrderStatus, Attribute } from '../enumerations/ordering.enum';
 import { Action } from "../enumerations/action.enum";
-import { MusicAttribute } from '../interfaces/music-attributes-given';
 import { Pile } from '../models/pile';
 import { ActionComp } from '../interfaces/action-comp';
 import { MusicAccess } from '../models/music-access';
-import { CommunicationService } from '../services/communication.service';
 import { PlayStrat } from '../enumerations/play-strat';
-import { NgxSpinnerService } from "ngx-spinner";
+
+
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
@@ -18,11 +16,12 @@ import { NgxSpinnerService } from "ngx-spinner";
 export class HomeComponent implements OnInit{
 
 
-  undoActions: Pile<ActionComp> = new Pile<ActionComp>(50);
-  redoActions: Pile<ActionComp> = new Pile<ActionComp>(50);  
+  private _undoActions: Pile<ActionComp> = new Pile<ActionComp>(50);
+  private _redoActions: Pile<ActionComp> = new Pile<ActionComp>(50);  
 
-  constructor(private dataService: DataService, private musicListService: ListMusicsService, private cdr: ChangeDetectorRef, private spinner: NgxSpinnerService
-  ) { }
+  adding: boolean = false;
+//private dataService: DataService,
+  constructor(private musicListService: ListMusicsService) { }
 
   
 
@@ -67,6 +66,24 @@ export class HomeComponent implements OnInit{
     this.volume = value;
   }
 
+  set undoActions(pile:Pile<ActionComp>){
+    this._undoActions = pile
+  }
+
+  get undoActions():Pile<ActionComp>{
+    this.musicList = this.musicList.concat()
+    return this._undoActions
+  }
+
+  set redoActions(pile:Pile<ActionComp>){
+    this._redoActions = pile
+  }
+
+  get redoActions():Pile<ActionComp>{
+    this.musicList = this.musicList.concat()
+    return this._redoActions
+  }
+
   set volume(value:number){
     this.musicListService.volume = value
   }
@@ -99,20 +116,35 @@ export class HomeComponent implements OnInit{
   }
 
   addMusics(path:string){
-    // Subscribe to add into actions after receiving the results
-    this.musicListService.addMusics(path).subscribe((indexes) => {
-      this.undoActions.push(
-        {
-          toDo: Action.Remove,
-          musics: [new MusicAccess(undefined)],
-          indexes: indexes.sort((a,b)=> (a<=b ? 1 : -1))
-        }
-      )
-      this.musicList = this.musicList.concat()
-    },
-    error => {
-      alert("Received error: "+error)
-    })
+    if (this.musicListService.totLength>=1000){
+      alert("Limit of 1000 musics already reached, no more musics addable.")
+    }
+    else {
+      if (this.adding){
+        alert("The processus of adding musics is already in progress.\nPlease wait the end before retrying.")
+      }
+      else {
+        
+        this.adding = true
+        // Subscribe to add into actions after receiving the results
+        this.musicListService.addMusics(path).subscribe((indexes) => {
+          this.undoActions.push(
+            {
+              toDo: Action.Remove,
+              musics: [new MusicAccess(undefined)],
+              indexes: indexes.sort((a,b)=> (a<=b ? 1 : -1))
+            }
+          )
+          this.adding = false
+        },
+        error => {
+          if (error.substring(0,"Exception".length)!="Exception"){
+            alert("Received error: "+error)
+          }
+          this.adding = false
+        })
+      }
+    }
   }
 
   addIndex(indexes: number[], elements: MusicAccess[]){
@@ -127,7 +159,6 @@ export class HomeComponent implements OnInit{
         indexes: indexReturned
       }
     )
-    this.cdr.detectChanges()
   }
   
   removeIndex(indexes: number[]) {
@@ -157,7 +188,6 @@ export class HomeComponent implements OnInit{
         }
       )
     }
-    this.musicList = this.musicList.concat()
   }
 
   upperMoveIndex(index: number){
@@ -171,7 +201,6 @@ export class HomeComponent implements OnInit{
         }
       )
     }
-    this.musicList = this.musicList.concat()
   }
   downMoveIndex(index: number){
     const approval: boolean = this.musicListService.downMoveIndex(index)
@@ -184,7 +213,6 @@ export class HomeComponent implements OnInit{
         }
       )
     }
-    this.musicList = this.musicList.concat()
   }
 
   undoAction(){
@@ -243,15 +271,30 @@ export class HomeComponent implements OnInit{
   }
 
   saveWork(){
-    this.musicListService.saveWork()
+    if (this.adding) {
+      alert("The processus of adding musics is in progress.\nPlease wait the end before saving your session.")
+    } 
+    else {      
+      this.musicListService.saveWork()
+    }
   }
 
-  saveFiles(path: string){
-    this.musicListService.saveFiles(path)
+  saveFiles(path: string){    
+    if (this.adding) {
+      alert("The processus of adding musics is in progress.\nPlease wait the end before saving the selected musics.")
+    } 
+    else {
+      this.musicListService.saveFiles(path)
+    }
   }
 
   downloadFiles(name: string){
-    this.musicListService.downloadFiles(name)
+    if (this.adding) {
+      alert("The processus of adding musics is in progress.\nPlease wait the end before downloading the zip file.")
+    }
+    else {
+      this.musicListService.downloadFiles(name)
+    }
   }
 
 }

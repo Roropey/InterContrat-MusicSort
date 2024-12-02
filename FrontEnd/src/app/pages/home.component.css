@@ -27,9 +27,18 @@
     overflow-y: auto;
     overflow-x: hidden;
 }
-
-
-ngx-spinner {
-    z-index: 9999 !important;  /* Assurez-vous qu'il est au-dessus des autres éléments */
+.adding-container {
+    display: flex;
+    justify-content: left;    
   }
 
+.adding-window {
+    position: fixed;
+    padding:10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    top:87%;
+    left:7%;
+    z-index: 1000;
+  }
