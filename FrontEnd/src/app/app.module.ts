@@ -2,7 +2,7 @@ import { importProvidersFrom, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
-import { BrowserAnimationsModule, NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ScrollingModule } from "@angular/cdk/scrolling";
 
 import { NgIconsModule } from '@ng-icons/core';
@@ -57,7 +57,6 @@ import { RouterModule } from '@angular/router';
     AppRoutingModule,
     HttpClientModule,
     BrowserAnimationsModule,
-    NoopAnimationsModule,
     NgIconsModule.withIcons({
       heroChevronDownSolid,
       heroChevronUpSolid,

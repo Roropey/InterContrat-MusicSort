@@ -26,11 +26,8 @@ public class AudioInfosController {
 
     @GetMapping("/upload")
     public List<MusicAttribute> uploadAudioFile(@RequestParam("filePath") String filePath) throws IOException {
-        System.out.println("received request");
-        List<MusicAttribute> audioFile = audioInfosService.saveAudioFilesFromDirectoryPath(filePath);
-        System.out.println("saved audio file");
-        System.out.println(audioFile.toString());
-        return audioFile;
+        //System.out.println("received request");
+        return audioInfosService.saveAudioFilesFromDirectoryPath(filePath);
     }
 
     @GetMapping("/metadata/{id}")
@@ -46,7 +43,7 @@ public class AudioInfosController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(404).body(new ApiResponse(false,"Music not found"));
         }
-        System.out.println("Check pass for "+musicAttribute.getFileName());
+        //System.out.println("Check pass for "+musicAttribute.getFileName());
         return ResponseEntity.ok(new ApiResponse(true,"Music found"));
     }
 
@@ -57,7 +54,6 @@ public class AudioInfosController {
 
     @PostMapping("/download")
     public ResponseEntity<byte[]> downloadZip(@RequestBody List<MusicAttribute> selectedMusics){
-        //@RequestParam("nameZip") String nameZip,
         try {
             byte[] zipFile = audioInfosService.createZipFile(selectedMusics);
             HttpHeaders headers = new HttpHeaders();
@@ -65,18 +61,24 @@ public class AudioInfosController {
             headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE);
             return ResponseEntity.ok().headers(headers).body(zipFile);
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Error in downloading zip: "+e.getMessage());
             return ResponseEntity.status(500).build();
         }
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Resource> getAudioFile(@PathVariable Long id) throws IOException {
-        File file = audioInfosService.getAudioFile(id);
-        InputStream inputStream = new FileInputStream(file);
-        InputStreamResource resource = new InputStreamResource(inputStream);
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_TYPE, "audio/mpeg")
-                .body(resource);
+        try {
+
+            File file = audioInfosService.getAudioFile(id);
+            InputStream inputStream = new FileInputStream(file);
+            InputStreamResource resource = new InputStreamResource(inputStream);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_TYPE, "audio/mpeg")
+                    .body(resource);
+        } catch (Exception e) {
+            System.out.println("Error in getting audio file: "+e.getMessage());
+            return ResponseEntity.status(500).build();
+        }
     }
 }

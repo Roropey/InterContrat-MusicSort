@@ -16,6 +16,7 @@ public class AudioInfos {
     @Column(unique = true)
     private String path;
     private String fileName;
+    private String extension;
     private String title;
     private String artist;
     private String album;
@@ -46,6 +47,15 @@ public class AudioInfos {
     public void setFileName(String fileName) {
         this.fileName = fileName;
     }
+
+    public String getExtension() {
+        return extension;
+    }
+
+    public void setExtension(String extension) {
+        this.extension = extension;
+    }
+
 
     public String getTitle() {
         return title;
@@ -116,6 +126,16 @@ public class AudioInfos {
 
     public void setGenre(String genre) {
         this.genre = genre;
+    }
+
+    public void setMusicAttribute(MusicAttribute musicAttribute) {
+        this.title = musicAttribute.getTitle();
+        this.artist = musicAttribute.getArtist();
+        this.album = musicAttribute.getAlbum();
+        //this.image = musicAttribute.getImage();
+        this.yearRelease = musicAttribute.getYearRelease();
+        this.number = musicAttribute.getNumber();
+        this.genre = musicAttribute.getGenre();
     }
 
     public MusicAttribute getMusicAttribute() {
