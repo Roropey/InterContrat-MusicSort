@@ -1,14 +1,15 @@
-import { AsyncPipe, NgIf, NgTemplateOutlet } from '@angular/common';
-import { Component, ContentChild, Input, OnInit, TemplateRef } from '@angular/core';
+import { AsyncPipe} from '@angular/common';
+import { Component, Input, OnInit } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { LoadingService } from '../../services/loading-service.service';
 import { RouteConfigLoadEnd, RouteConfigLoadStart, Router } from '@angular/router';
 
 @Component({
-    selector: 'app-loading-indicator',
-    templateUrl: "./loading-indicator.component.html",
-    styleUrls: ["./loading-indicator.component.css"],
-    imports: [AsyncPipe, NgIf, NgTemplateOutlet]
+selector: 'app-loading-indicator',
+  templateUrl: "./loading-indicator.component.html",
+  styleUrls: ["./loading-indicator.component.css"],
+  imports: [AsyncPipe],
+  standalone: true,
 })
 export class LoadingIndicatorComponent implements OnInit {
 
@@ -17,12 +18,8 @@ export class LoadingIndicatorComponent implements OnInit {
   @Input()
   detectRouteTransitions = false;
 
-  @ContentChild("loading")
-  customLoadingIndicator: TemplateRef<any> | null = null;
-
   constructor(
-  private loadingService: LoadingService, 
-  private router: Router) {
+  private loadingService: LoadingService, private router: Router) {
     this.loading$ = this.loadingService.loading$;
   }
 
