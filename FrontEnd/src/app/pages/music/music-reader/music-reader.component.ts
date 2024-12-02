@@ -3,9 +3,10 @@ import { MusicAccess } from '../../../models/music-access';
 import { CommunicationService } from '../../../services/communication.service';
 
 @Component({
-  selector: 'app-music-reader',
-  templateUrl: './music-reader.component.html',
-  styleUrl: './music-reader.component.css'
+    selector: 'app-music-reader',
+    templateUrl: './music-reader.component.html',
+    styleUrl: './music-reader.component.css',
+    standalone: false
 })
 export class MusicReaderComponent implements OnInit {
 

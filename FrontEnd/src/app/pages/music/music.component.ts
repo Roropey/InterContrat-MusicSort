@@ -4,9 +4,10 @@ import { CommunicationService } from '../../services/communication.service';
 
 
 @Component({
-  selector: 'app-music',
-  templateUrl: './music.component.html',
-  styleUrl: './music.component.css'
+    selector: 'app-music',
+    templateUrl: './music.component.html',
+    styleUrl: './music.component.css',
+    standalone: false
 })
 export class MusicComponent {
   @Input()

@@ -5,11 +5,10 @@ import { LoadingService } from '../../services/loading-service.service';
 import { RouteConfigLoadEnd, RouteConfigLoadStart, Router } from '@angular/router';
 
 @Component({
-selector: 'app-loading-indicator',
-  templateUrl: "./loading-indicator.component.html",
-  styleUrls: ["./loading-indicator.component.css"],
-  imports: [AsyncPipe, NgIf, NgTemplateOutlet],
-  standalone: true,
+    selector: 'app-loading-indicator',
+    templateUrl: "./loading-indicator.component.html",
+    styleUrls: ["./loading-indicator.component.css"],
+    imports: [AsyncPipe, NgIf, NgTemplateOutlet]
 })
 export class LoadingIndicatorComponent implements OnInit {
 

@@ -1,9 +1,10 @@
 import { Component, Output, EventEmitter } from '@angular/core';
 
 @Component({
-  selector: 'app-save-bar',
-  templateUrl: './save-bar.component.html',
-  styleUrl: './save-bar.component.css'
+    selector: 'app-save-bar',
+    templateUrl: './save-bar.component.html',
+    styleUrl: './save-bar.component.css',
+    standalone: false
 })
 export class SaveBarComponent {
 

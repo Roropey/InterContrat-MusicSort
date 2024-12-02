@@ -5,9 +5,10 @@ import { PlayStrat } from '../../enumerations/play-strat';
 
 
 @Component({
-  selector: 'app-tools-bar',
-  templateUrl: './tools-bar.component.html',
-  styleUrl: './tools-bar.component.css'
+    selector: 'app-tools-bar',
+    templateUrl: './tools-bar.component.html',
+    styleUrl: './tools-bar.component.css',
+    standalone: false
 })
 export class ToolsBarComponent {  
   private _searchText: string = "";
