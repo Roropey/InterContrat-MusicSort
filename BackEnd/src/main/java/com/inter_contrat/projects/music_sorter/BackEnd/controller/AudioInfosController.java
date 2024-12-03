@@ -60,6 +60,9 @@ public class AudioInfosController {
             headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + "test" + ".zip\"");
             headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE);
             return ResponseEntity.ok().headers(headers).body(zipFile);
+        } catch (java.lang.OutOfMemoryError e){
+            System.out.println("Error of memory downloading zip: "+e.getMessage());
+            return ResponseEntity.status(507).build();
         } catch (IOException e) {
             System.out.println("Error in downloading zip: "+e.getMessage());
             return ResponseEntity.status(500).build();

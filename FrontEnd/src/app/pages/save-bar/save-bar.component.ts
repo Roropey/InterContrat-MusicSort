@@ -23,9 +23,11 @@ export class SaveBarComponent {
 
   openClosePopupSave() {
     this.openPopupSave = !this.openPopupSave
+    this.pathSave = ""
   }
   openClosePopupDownload() {
     this.openPopupDownload = !this.openPopupDownload
+    this.nameDownload = ""
   }
 
   saveLocaly(){

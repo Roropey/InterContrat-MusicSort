@@ -335,22 +335,33 @@ export class ListMusicsService {
   downloadFiles(name: string){
     const musics:MusicAttribute[] = this.getMusicAttributes()
     if (musics.length>0) {
-      this.downloadZip(name,musics).subscribe(response => {
-        const blob = new Blob([response], { type: 'application/zip' });
-        const url:string = window.URL.createObjectURL(blob)
-        const a:any = document.createElement("a")
-        a.style = 'display:none'
-        a.href = url
-        a.download = name.substring(-4) == ".zip" ? name : name+".zip"
-        if (!document.body.contains(a)) {
-          document.body.appendChild(a);
-        }
-        a.click()
-        window.URL.revokeObjectURL(url);
-      }, error => {
-        alert("Error when downloading zip")
-        console.log("Error when downloading zip: "+error.type)
-      })
+      if (musics.length>1000){
+        alert("The functionnality of downloading zip only work for equal or less than 42 musics to not make the backend crash of being out of memory.")
+      } 
+      else {
+        this.downloadZip(name,musics).subscribe(response => {
+          const blob = new Blob([response], { type: 'application/zip' });
+          const url:string = window.URL.createObjectURL(blob)
+          const a:any = document.createElement("a")
+          a.style = 'display:none'
+          a.href = url
+          a.download = name.substring(-4) == ".zip" ? name : name+".zip"
+          if (!document.body.contains(a)) {
+            document.body.appendChild(a);
+          }
+          a.click()
+          window.URL.revokeObjectURL(url);
+        }, error => {
+          console.log("Error when downloading zip: "+JSON.stringify(error))
+          if (error.status == 507){
+            alert("The functionnality of downloading zip only work for less musics (maximum number depends of the musics due to the size) to not make the backend crash by being out of memory.")
+          }
+          else {            
+            alert("Error when downloading zip.")
+          }
+        })
+      }
+      
     }
   }
 

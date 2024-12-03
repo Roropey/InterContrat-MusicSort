@@ -242,8 +242,16 @@ public class AudioInfosService {
             tag.setField(FieldKey.TITLE,musicAttribute.getTitle());
             tag.setField(FieldKey.ARTIST,musicAttribute.getArtist());
             tag.setField(FieldKey.ALBUM,musicAttribute.getAlbum());
-            tag.setField(FieldKey.YEAR,musicAttribute.getYearRelease().toString());
-            tag.setField(FieldKey.TRACK,musicAttribute.getNumber().toString());
+            try {
+                tag.setField(FieldKey.YEAR,musicAttribute.getYearRelease().toString());
+            } catch (NullPointerException _){
+                ;;
+            }
+            try {
+                tag.setField(FieldKey.TRACK,musicAttribute.getNumber().toString());
+            } catch (NullPointerException _){
+                ;;
+            }
             tag.setField(FieldKey.GENRE,musicAttribute.getGenre());
             AudioFileIO.write(audioFile);
         } catch (Exception e) {
@@ -254,7 +262,9 @@ public class AudioInfosService {
     public byte[] createZipFile(List<MusicAttribute> musicsAttributes) throws IOException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream)) {
+            int limit=0;
             for (MusicAttribute musicAttribute : musicsAttributes) {
+                System.out.println("Current: "+(limit++));
                 AudioInfos audioInfos = getAudioInfo(musicAttribute);
                 String filePath = audioInfos.getPath();
                 String ext = FilenameUtils.getExtension(filePath);
