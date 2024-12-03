@@ -3,17 +3,20 @@
     <div class="row-display tools-bar-boxe">
         <div class="row-display right-tool-container">
             <input class="search-bar" [(ngModel)]="searchText" placeholder="Search" type="text"/>
-            <button class="white-icon icon-button" (click)="resetSearch()">
+            <button class="white-icon icon-button" (click)="resetSearch()"
+            ngxTooltip [template]="tooltipResetSearch">                
                 <ng-icon name="heroXMarkSolid" color="var(--color-white)" size="40"/>
             </button>
-            <button class="icon-button" (click)="titleOrdering()">
+            <button class="icon-button" (click)="titleOrdering()"
+            ngxTooltip [template]="tooltipTitle">
                 <ng-icon *ngIf="order==-1 && attributeOrder==attribute.Title" name="heroArrowDownSolid" color="var(--white)" size="40"/>            
                 <ng-icon *ngIf="(attributeOrder==attribute.Title && order==0) || attributeOrder!=attribute.Title" name="heroMinusSolid" color="var(--gray)" size="40"/>
                 <ng-icon *ngIf="order==1 && attributeOrder==attribute.Title" name="heroArrowUpSolid" color="var(--white)" size="40"/>
                 <div [ngClass]="{'orderingTextNotSelected': (attributeOrder==attribute.Title && order==0) || attributeOrder!=attribute.Title, 'orderingTextSelected': attributeOrder==attribute.Title && order!=0}">Title</div>
             </button>
 
-            <button class="icon-button" (click)="artistOrdering()">
+            <button class="icon-button" (click)="artistOrdering()"
+            ngxTooltip [template]="tooltipArtist">
                 <ng-icon *ngIf="order==-1 && attributeOrder==attribute.Artist" name="heroArrowDownSolid" color="var(--white)" size="40"/>            
                 <ng-icon *ngIf="(attributeOrder==attribute.Artist && order==0) || attributeOrder!=attribute.Artist" name="heroMinusSolid" color="var(--gray)" size="40"/>
                 <ng-icon *ngIf="order==1 && attributeOrder==attribute.Artist" name="heroArrowUpSolid" color="var(--white)" size="40"/>
@@ -30,7 +33,8 @@
                 
             </button>
             <div class = "volume-container row-display">
-                <button class="icon-button white-icon" (click)="mute()">
+                <button class="icon-button white-icon" (click)="mute()"
+                ngxTooltip [template]="tooltipSpeaker">
                     <ng-icon *ngIf="volume>0" name="heroSpeakerWaveSolid" color="var(--color-white)" size="40"/>
                     <ng-icon *ngIf="volume==0" name="heroSpeakerXMarkSolid" color="var(--color-white)" size="40"/>
                 </button>
@@ -67,9 +71,45 @@
 </div>
 
 
+
+<ng-template #tooltipResetSearch>
+    <div class="tooltip-item">
+        <p>Reset search</p>
+    </div>
+</ng-template>
+<ng-template #tooltipTitle>
+    <div *ngIf="order==-1 && attributeOrder==attribute.Title" class="tooltip-item">
+        <p>To reset title sorting</p>
+    </div>           
+    <div *ngIf="(attributeOrder==attribute.Title && order==0) || attributeOrder!=attribute.Title" class="tooltip-item">
+        <p>To sort in increasing order by title</p>
+    </div>         
+    <div *ngIf="order==1 && attributeOrder==attribute.Title" class="tooltip-item">
+        <p>To sort in decreasing order by title</p>
+    </div>        
+</ng-template>
+<ng-template #tooltipArtist>
+    <div *ngIf="order==-1 && attributeOrder==attribute.Artist" class="tooltip-item">
+        <p>To reset artist sorting</p>
+    </div>           
+    <div *ngIf="(attributeOrder==attribute.Artist && order==0) || attributeOrder!=attribute.Artist" class="tooltip-item">
+        <p>To sort in increasing order by artist</p>
+    </div>         
+    <div *ngIf="order==1 && attributeOrder==attribute.Artist" class="tooltip-item">
+        <p>To sort in decreasing order by artist</p>
+    </div>        
+</ng-template>
 <ng-template #tooltipPlayStrat>
     <div class="tooltip-item">
         <p>{{playStratApplied}}</p>
+    </div>
+</ng-template>
+<ng-template #tooltipSpeaker>
+    <div *ngIf="volume>0" class="tooltip-item">
+        <p>To mute</p>
+    </div>
+    <div *ngIf="volume==0" class="tooltip-item">
+        <p>To unmute</p>
     </div>
 </ng-template>
 <ng-template #tooltipAdd>
