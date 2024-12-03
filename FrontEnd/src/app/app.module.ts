@@ -88,7 +88,8 @@ import { RouterModule } from '@angular/router';
   ],
   providers: [PopoverConfigProvider,
     importProvidersFrom(
-      BrowserModule,
+      BrowserModule,      
+      BrowserAnimationsModule,
       AppRoutingModule,
       RouterModule,
       LoadingService
