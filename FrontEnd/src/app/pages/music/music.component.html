@@ -1,10 +1,12 @@
 
 <div class="music-boxe row-display " #musicContainer>
     <div class="column-display positions-container">
-        <button *ngIf="index!=0" class="green-icon icon-button" (click)="moveUpMusic()">
+        <button *ngIf="index!=0" class="green-icon icon-button" (click)="moveUpMusic()"
+        ngxTooltip [template]="tooltipMoveUp" placement="right">
             <ng-icon name="heroChevronUpSolid" color="var(--color-green)" size="40"/>
         </button>
-        <button *ngIf="index!=maxIndex-1" class="green-icon icon-button" (click)="moveDownMusic()">
+        <button *ngIf="index!=maxIndex-1" class="green-icon icon-button" (click)="moveDownMusic()"
+        ngxTooltip [template]="tooltipMoveDown" placement="right">
             <ng-icon name="heroChevronDownSolid" color="var(--color-green)" size="40"/>
         </button>
     </div>
@@ -73,6 +75,16 @@
     </button>
 </div>
 
+<ng-template #tooltipMoveUp>
+    <div class="tooltip-item">
+        <p>Move music up in list</p>
+    </div>
+</ng-template>
+<ng-template #tooltipMoveDown>
+    <div class="tooltip-item">
+        <p>Move music down in list</p>
+    </div>
+</ng-template>
 <ng-template #tooltipDelete>
     <div class="tooltip-item">
         <p>Delete music</p>
