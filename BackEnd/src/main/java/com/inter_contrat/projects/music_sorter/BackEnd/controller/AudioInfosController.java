@@ -1,5 +1,6 @@
 package com.inter_contrat.projects.music_sorter.BackEnd.controller;
 import com.inter_contrat.projects.music_sorter.BackEnd.model.ApiResponse;
+import com.inter_contrat.projects.music_sorter.BackEnd.model.AudioInfos;
 import com.inter_contrat.projects.music_sorter.BackEnd.model.MusicAttribute;
 import com.inter_contrat.projects.music_sorter.BackEnd.service.AudioInfosService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,12 +10,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.MediaType;
 
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
+
 import org.springframework.http.HttpHeaders;
 
-import java.io.File;
-import java.io.InputStream;
 import java.util.List;
 
 @RestController
@@ -38,8 +37,10 @@ public class AudioInfosController {
     @PostMapping("/check")
     public ResponseEntity<Object> updateAudioMetadata(@RequestBody MusicAttribute musicAttribute) {
         try {
-            audioInfosService.getAudioInfo(musicAttribute);
-
+            File file = new File(audioInfosService.getAudioInfo(musicAttribute).getPath());
+            if (!(file.exists() && file.isFile())) {
+                throw new RuntimeException("File exist not more");
+            }
         } catch (RuntimeException e) {
             return ResponseEntity.status(404).body(new ApiResponse(false,"Music not found"));
         }

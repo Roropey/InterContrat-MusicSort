@@ -82,9 +82,9 @@ public class AudioInfosService {
                     }
                     break;
                 case "wav":
+                    //System.out.println("wav");
                     //audioFile = new WavFileReader().read(file);
                     attributes.put("title",file.getName());
-                    //System.out.println(attributes);
                     return attributes;
                 default:
                     attributes.put("error", "true");
@@ -92,7 +92,7 @@ public class AudioInfosService {
             }
 
             Tag tag = audioFile.getTag();
-            //System.out.println(tag);
+
             //System.out.println(tag.getClass().getSimpleName());
             attributes.put("title", tag.getFirst(FieldKey.TITLE)==null ? file.getName() : tag.getFirst(FieldKey.TITLE));
             attributes.put("artist",tag.getFirst(FieldKey.ARTIST));
@@ -133,6 +133,7 @@ public class AudioInfosService {
                 ;;
             }
             audioInfos.setGenre((String) attributes.get("genre"));
+            /*
             try {
                 if (attributes.containsKey("image") && attributes.get("image") != null) {
 
@@ -140,7 +141,8 @@ public class AudioInfosService {
                 }
             } catch (Exception e) {
                 System.out.println("Failed to get image to blob: "+e.getMessage());
-            }
+            }*/
+
             audioInfos.setCreatedAt(new Date());
             //System.out.println(audioInfos.toString());
             return Optional.of(audioInfos);
@@ -271,7 +273,6 @@ public class AudioInfosService {
                 File file = new File(filePath);
                 if (file.exists() && file.isFile()) {
                     zipOutputStream.putNextEntry(new ZipEntry(musicAttribute.getFileName()+"."+ext));
-                    //System.out.println(audioInfos.equalsMetadata(musicAttribute));
                     if (audioInfos.equalsMetadata(musicAttribute)){
                         Files.copy(file.toPath(), zipOutputStream);
                     } else {
