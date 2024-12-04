@@ -1,8 +1,6 @@
 import { Injectable, Inject } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { catchError, mergeMap, map, Observable, throwError, tap, forkJoin, merge, switchMap, of } from 'rxjs';
-import { Pile } from '../models/pile';
-import { ActionComp } from '../interfaces/action-comp';
+import { catchError, mergeMap, map, Observable, throwError, of, forkJoin, switchMap } from 'rxjs';
 import { MusicAttribute } from '../interfaces/music-attributes-given';
 import { OrderStatus, Attribute } from '../enumerations/ordering.enum';
 import { MusicAccess } from '../models/music-access';
@@ -159,7 +157,6 @@ export class ListMusicsService {
           case PlayStrat.Stop:
             this._musicList[comComp.index].stopAudio()
         }
-
     }
   }
 
@@ -191,7 +188,7 @@ export class ListMusicsService {
   }
 
   addMusics(path:string):Observable<number[]>{
-    return this.getMusicAttribute(path).pipe(
+    return this.getMusicsAttributesRequest(path).pipe(
       catchError((error) => {
         return throwError(() => new Error("Error retrieving music attributes "+JSON.stringify(error)))
       }),
@@ -220,7 +217,7 @@ export class ListMusicsService {
             map((musicAccessServices: number[]) => {
               return musicAccessServices
             })
-          );
+          )
         } else {
           return throwError(() => new Error("Error type of received music"));
         }
@@ -228,14 +225,14 @@ export class ListMusicsService {
     )
   }
 
-  getMusicAttribute(path:string):Observable<MusicAttribute[]>{
+  private getMusicsAttributesRequest(path:string):Observable<MusicAttribute[]>{
     const params = new HttpParams().set('filePath',path)
     const headers = new HttpHeaders().set('Accept','application/json')
     headers.set('timeout','${2000000}')
     return this.http.get<MusicAttribute[]>(this.apiUrl+"/upload", {params, headers})
   }
 
-  getAudio(index:number):Observable<Blob>{
+  private getAudio(index:number):Observable<Blob>{
     return this.http.get(this.apiUrl+"/"+index,{responseType:'blob'})
   }
 
@@ -288,9 +285,17 @@ export class ListMusicsService {
       return false
     }
   }
-  saveWork(){
-    this.clearLocalStorage()
-    this.saveListsToLocalStorage()
+
+  saveWorkSession(){
+    sessionStorage.clear()
+    console.log("Time to save session")
+    this.saveListsToStorage(sessionStorage)
+  }
+
+  saveWorkLocaly(){
+    localStorage.clear()
+    console.log("Time to save")
+    this.saveListsToStorage(localStorage)
   }
 
   getMusicAttributes():MusicAttribute[]{
@@ -326,7 +331,7 @@ export class ListMusicsService {
       })
     }
   }
-  saveMusicAttribute(path:string,musics:MusicAttribute[]): Observable<String>{
+  private saveMusicAttribute(path:string,musics:MusicAttribute[]): Observable<String>{
     const params = new HttpParams().set('savePath',path)
     const headers = new HttpHeaders().set('Accept','application/json')
     return this.http.post<String>(this.apiUrl+"/save", musics, {params, headers})
@@ -360,72 +365,115 @@ export class ListMusicsService {
             alert("Error when downloading zip.")
           }
         })
-      }
-      
+      }      
     }
   }
 
-  downloadZip(fileName: string, musics:MusicAttribute[] ): Observable<Blob>{
+  private downloadZip(fileName: string, musics:MusicAttribute[] ): Observable<Blob>{
     const params = new HttpParams().set('nameZip',fileName)
     const headers = new HttpHeaders().set('Accept','application/zip')
     return this.http.post(this.apiUrl+"/download",musics,{ responseType: 'blob' ,params})
   }
 
-  resumeList(list:MusicAccess[]):MusicAttribute[]{
-    return list.map((element) => {      
-      var musicAttribute:MusicAttribute = element.musicAttribute
-      musicAttribute.accessPath = ""
-      return musicAttribute
-    })
+  summaryAttributes(musicAccess:MusicAccess):MusicAttribute{
+    var musicAttribute:MusicAttribute = musicAccess.musicAttribute
+    musicAttribute.accessPath = ""
+    return musicAttribute    
   }
 
-  saveListsToLocalStorage():void {
+
+  private getMusicAttributeRequest(index:number):Observable<MusicAttribute>{
+    return this.http.get<MusicAttribute>(this.apiUrl+"/metadata/"+index)
+  }
+
+  saveListsToStorage(storage:Storage):void {    
+    const musicList = this._musicList.concat(this._musicListRetired)
+    const data = musicList.map((element)=>element.musicAttribute.id).toString()
+    storage.setItem("listId",data)
     try {
-      
-      localStorage.setItem("keepList",JSON.stringify(this.resumeList(this._musicList)))
-      localStorage.setItem("retiredList",JSON.stringify(this.resumeList(this._musicListRetired)))
+      musicList.forEach((element) => {
+        this.getMusicAttributeRequest(element.musicAttribute.id).subscribe(
+          response => {
+            if(!element.equalData(response)){
+              console.log("Save some for change")
+              storage.setItem("element"+element.musicAttribute.id,JSON.stringify(this.summaryAttributes(element)))
+            }
+          },
+          error => {
+            return throwError(() => new Error("Error when trying to get musicAttribute in back-end for "+element.musicAttribute.fileName+": "+JSON.stringify(error)))
+          }
+        )   
+      })
     } catch (error){
-      alert("Unable to save session locally, maybe the size of your music list is to big.")
+      alert("Unable to save session locally the modification, maybe too much modifications.")
     }
+  
   }
 
-  getListFromLocalStorage(key:string):MusicAttribute[]{
-    const list = localStorage.getItem(key)
-    return list ? JSON.parse(list) : []
+  getIdsListStorage(storage:Storage):number[]{
+    const list = storage.getItem("listId")
+    return list ? list.split(',').map((element) => parseInt(element)) : []
   }
 
-  clearLocalStorage():void{
-    localStorage.clear()
+  getMusicsAttributes(key:string,storage:Storage):MusicAttribute[]{
+    const list = storage.getItem(key)
+    return list ? [JSON.parse(list)] : []
   }
 
-  initFromLocalStorage(){   
-    this.getListFromLocalStorage("keepList").map(music => {
-      this.checkAndAdd(music).subscribe(response => {
-      },
-      error => {
-        console.log("Failed: ",error)
-      })
-    })
-    this.getListFromLocalStorage("retiredList").map(music => {
-      this.checkAndAdd(music).subscribe(response => {
-      },
-      error => {
-        console.log("Failed: ",error)
-      })
-    })
+  initLists():Observable<number[]>{
+    return this.restoreLists(localStorage)
+  }
+
+  restoreLists(storage:Storage):Observable<number[]>{
+    const listIds:number[] = this.getIdsListStorage(storage)
+    if (listIds.length>0){
+      return of(this.getIdsListStorage(storage)).pipe(
+        mergeMap((idList:number[]) =>{
+          const observableToFork$ = idList.map((id) =>{
+  
+          
+            const savedInStorage = this.getMusicsAttributes("element"+id,storage)
+            if (savedInStorage.length==0){
+              return this.getCheckAndAdd(id)
+            }
+            else {
+              return this.checkAndAdd(savedInStorage[0])
+            }
+          })
+          return forkJoin(observableToFork$)
+        }) 
+      )
+    }
+    else {
+      return of([])
+    }
     
-
   }
-  checkAndAdd(music:MusicAttribute):Observable<void>{
-    return this.checkExist(music).pipe(      
+
+  getCheckAndAdd(id:number):Observable<number>{
+    return this.getMusicAttributeRequest(id).pipe(
+      mergeMap((response) => {
+        return this.checkAndAdd(response)
+      }),
+      catchError((error) => {        
+        return throwError(() => new Error("Error when checking "+id+" from zero pipe: "+error+"/"+JSON.stringify(error)))
+      })
+    )
+  }
+
+
+  checkAndAdd(music:MusicAttribute):Observable<number>{
+    return this.checkExist(music).pipe( 
+           
       mergeMap((response) => {
         if (response.success){
           return this.getAudio(music.id).pipe(
             catchError((error) => {
               return throwError(() => new Error("Error retrieving audio blob " + error))
             }),
+            
             map((audioBlob: Blob) => {
-              this.addIndex(-1,new MusicAccess(music, this.communicationService, audioBlob))
+              return this.addIndex(-1,new MusicAccess(music, this.communicationService, audioBlob))
             })
           )
         } else {
@@ -438,7 +486,7 @@ export class ListMusicsService {
     )
   }
 
-  checkExist(music: MusicAttribute): Observable<any>{
+  private checkExist(music: MusicAttribute): Observable<any>{
     return this.http.post<String>(this.apiUrl+"/check", music)
   }
 

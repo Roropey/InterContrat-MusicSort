@@ -28,28 +28,25 @@ export class HomeComponent implements OnInit{
 
   ngOnInit(): void {
     
-    /*
-    this.dataService.getData().subscribe((data) => {
-      this.musicListService.musicList = data.map((element) => new MusicAccess(element))
-    }, error => {
-      console.error('Error when taking data with data service:', error)
-    });*/
-       
-    this.musicListService.getListFromLocalStorage("keepList").map(music => {
-      this.musicListService.checkAndAdd(music).subscribe(response => {
-        this.musicList = this.musicList.concat()
-      },
-      error => {
-        console.log("Failed: ",error)
-      })
+    this.adding = true
+    this.musicListService.initLists().subscribe(indexes=>{
+      if (indexes) {        
+        this.undoActions.push(
+          {
+            toDo: Action.Remove,
+            musics: [new MusicAccess(undefined)],
+            indexes: indexes.sort((a,b)=> (a<=b ? 1 : -1))
+          }
+        )
+      }
+      this.adding = false
+    },
+    error=>{
+      alert("Failed to initialize based on storage.")
+      console.log("Failed to initialize based on storage: "+JSON.stringify(error))
+      this.adding = false
     })
-    this.musicListService.getListFromLocalStorage("retiredList").map(music => {
-      this.musicListService.checkAndAdd(music).subscribe(response => {},
-      error => {
-        console.log("Failed: ",error)
-      })
-    })
-    //this.musicListService.initFromLocalStorage()
+    
   }
 
 
@@ -276,7 +273,7 @@ export class HomeComponent implements OnInit{
       alert("The processus of adding musics is in progress.\nPlease wait the end before saving your session.")
     } 
     else {      
-      this.musicListService.saveWork()
+      this.musicListService.saveWorkLocaly()
     }
   }
 

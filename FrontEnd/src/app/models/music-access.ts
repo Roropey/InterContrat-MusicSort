@@ -152,6 +152,16 @@ export class MusicAccess {
     return this._audioState.isPlaying
   }
 
+  equalData(attributes:MusicAttribute):boolean{
+    return this._musicAttribute.fileName == attributes.fileName &&
+      this._musicAttribute.title == attributes.title &&
+      this._musicAttribute.artist == attributes.artist &&
+      this._musicAttribute.album == attributes.album &&
+      this._musicAttribute.yearRelease == attributes.yearRelease &&
+      this._musicAttribute.number == attributes.number && 
+      this._musicAttribute.genre == attributes.genre
+  }
+
 
   private updateState(): void {
     this._audioState.currentTime = this._audio.currentTime
