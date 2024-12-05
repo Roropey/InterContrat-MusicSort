@@ -114,7 +114,7 @@ export class HomeComponent implements OnInit{
   }
 
   addMusics(path:string){
-    if (this.musicListService.totLength>=1000){
+    if (this.musicListService.tooMuchMusic){
       alert("Limit of 1000 musics already reached, no more musics addable.")
     }
     else {

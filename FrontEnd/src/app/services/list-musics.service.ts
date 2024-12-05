@@ -20,6 +20,7 @@ export class ListMusicsService {
   private _attributeOrder: Attribute = Attribute.Title;
   private _currentPlayingIndex:number = -1;
   private _playStrat: PlayStrat = PlayStrat.Stop;
+  private _limitList: number = 1000;
 
   private apiUrl ="http://localhost:8080/audio";
 
@@ -27,9 +28,7 @@ export class ListMusicsService {
     this.communicationService.getSignal().subscribe(event=>{
       this.interpretCom(event)
     })
-   }
-
-  
+   }  
 
   get musicList():MusicAccess[]{
     return this._musicList
@@ -133,6 +132,10 @@ export class ListMusicsService {
     return this._musicList.length + this._musicListRetired.length
   }
 
+  get tooMuchMusic():boolean{
+    return this.totLength >= this._limitList
+  }
+
   interpretCom(comComp: ComComposition){
     switch (comComp.action){
       case PlayAction.Play:
@@ -194,12 +197,11 @@ export class ListMusicsService {
       }),
       switchMap((musics: MusicAttribute[]) => {
         if (musics) {
-          console.log(musics.length)
           
-          const addingThreshold = 1000 - this.totLength
+          const addingThreshold = this._limitList - this.totLength
           if (musics.length > addingThreshold) {
-            if (!confirm("Adding the musics found will make the number of musics exceed 1000, should continue or not ?\nIf continue, only the "+addingThreshold+" first musics found will be added.")){
-              return throwError (() => new Error("Exception : Not continuiing with more than 1000 musics"))
+            if (!confirm("Adding the musics found will make the number of musics exceed "+this._limitList+", should continue or not ?\nIf continue, only the "+addingThreshold+" first musics found will be added.")){
+              return throwError (() => new Error("Exception : Not continuiing with more than "+this._limitList+" musics"))
             }
           }
           const audioRequests:Observable<number>[] = musics.slice(0,Math.min(addingThreshold,musics.length)).map((music) =>
@@ -340,7 +342,7 @@ export class ListMusicsService {
   downloadFiles(name: string){
     const musics:MusicAttribute[] = this.getMusicAttributes()
     if (musics.length>0) {
-      if (musics.length>1000){
+      if (musics.length>this._limitList){
         alert("The functionnality of downloading zip only work for equal or less than 42 musics to not make the backend crash of being out of memory.")
       } 
       else {
